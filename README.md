@@ -2,7 +2,7 @@
 
 Aplicación móvil creada con Expo Go
 
-## 🚀 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 ai7-life-app/
@@ -18,7 +18,7 @@ ai7-life-app/
 └── package.json
 ```
 
-## 📱 Cómo ejecutar la app
+## Cómo ejecutar la app
 
 1. **Iniciar el servidor de desarrollo:**
    ```bash
@@ -34,21 +34,21 @@ ai7-life-app/
    - Presiona `i` para abrir en simulador iOS (solo Mac)
    - Presiona `w` para abrir en navegador web
 
-## 📦 Dependencias Instaladas
+## Dependencias Instaladas
 
 - **expo**: Framework principal
 - **react-navigation**: Navegación entre pantallas
 - **react-native-screens**: Optimización de pantallas
 - **react-native-safe-area-context**: Manejo de áreas seguras
 
-## 🛠️ Próximos Pasos
+## Próximos Pasos
 
 - Agregar las pantallas según diseño
 - Configurar navegación entre pantallas
 - Implementar componentes personalizados
 - Agregar estilos y tema
 
-## 📝 Notas
+## Notas
 
 - La app está lista para recibir las pantallas personalizadas
 - La navegación está preparada pero comentada hasta agregar más screens
