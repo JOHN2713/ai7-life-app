@@ -6,7 +6,7 @@ import { COLORS } from '../constants/colors';
 export default function BottomNavigation({ activeTab, onTabPress }) {
   const tabs = [
     { name: 'home', icon: 'home', label: 'Inicio' },
-    { name: 'planner', icon: 'calendar', label: 'Planificador' },
+    { name: 'planner', icon: 'calendar', label: 'Metas' },
     { name: 'chat', icon: 'chatbubbles', label: 'Chat' },
     { name: 'profile', icon: 'person', label: 'Perfil' },
   ];
@@ -35,6 +35,10 @@ export default function BottomNavigation({ activeTab, onTabPress }) {
 
 const styles = StyleSheet.create({
   container: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     backgroundColor: COLORS.white,
     paddingBottom: 20,

@@ -105,7 +105,7 @@ export default function OnboardingScreen({ navigation }) {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      navigation.replace('Home');
+      navigation.replace('Main');
     }
   };
 
