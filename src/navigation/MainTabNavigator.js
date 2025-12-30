@@ -52,8 +52,9 @@ export default function MainTabNavigator() {
           elevation: 10,
         },
         tabBarItemStyle: {
-          borderRadius: 12,
+          borderRadius: 16,
           marginHorizontal: 5,
+          overflow: 'hidden',
         },
         tabBarActiveBackgroundColor: COLORS.primary,
         tabBarShowLabel: false,
