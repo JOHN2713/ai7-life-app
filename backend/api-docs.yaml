@@ -1,0 +1,225 @@
+openapi: 3.0.0
+info:
+  title: AI7 Life API
+  description: API REST para autenticación de usuarios en AI7 Life App
+  version: 1.0.0
+  contact:
+    name: AI7 Life Team
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desarrollo local
+
+paths:
+  /auth/register:
+    post:
+      summary: Registrar nuevo usuario
+      tags:
+        - Autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: "Juan Pérez"
+                  description: Nombre completo del usuario
+                email:
+                  type: string
+                  format: email
+                  example: "juan@example.com"
+                  description: Email único del usuario
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "password123"
+                  description: Contraseña (mínimo 8 caracteres)
+                birthDate:
+                  type: string
+                  format: date
+                  example: "1990-01-15"
+                  description: Fecha de nacimiento (opcional)
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Usuario registrado exitosamente"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email ya registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      summary: Iniciar sesión
+      tags:
+        - Autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "juan@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login exitoso"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Datos incompletos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/verify:
+    get:
+      summary: Verificar token JWT
+      tags:
+        - Autenticación
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token válido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    example: true
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Token inválido o expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "Juan Pérez"
+        email:
+          type: string
+          format: email
+          example: "juan@example.com"
+        birthDate:
+          type: string
+          format: date
+          example: "1990-01-15"
+          nullable: true
+        avatar:
+          type: string
+          format: uri
+          example: "https://api.dicebear.com/7.x/avataaars/svg?seed=juan@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-13T10:30:00Z"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Descripción del error"
+        details:
+          type: string
+          example: "Detalles adicionales del error"
+          description: "Solo en modo development"
+
+tags:
+  - name: Autenticación
+    description: Endpoints para registro, login y verificación de usuarios
