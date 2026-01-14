@@ -1,9 +1,11 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, StatusBar, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { COLORS } from '../constants/colors';
+import { getUserData, clearAllData } from '../services/storage';
 
 export default function ProfileScreen({ navigation }) {
   const [fontsLoaded] = useFonts({
@@ -12,23 +14,51 @@ export default function ProfileScreen({ navigation }) {
     Manrope_700Bold,
   });
 
-  // Datos del usuario (temporal)
-  const user = {
-    name: 'User',
-    phone: '1234 456 7899',
-    photo: null, // Aquí iría la foto del usuario
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Recargar datos cuando la pantalla obtiene foco
+  useFocusEffect(
+    React.useCallback(() => {
+      loadUserData();
+    }, [])
+  );
+
+  const loadUserData = async () => {
+    try {
+      const userData = await getUserData();
+      if (userData) {
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!fontsLoaded) {
-    return null;
+  if (!fontsLoaded || loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
   }
 
-  const handleLogout = () => {
-    // Navegar de vuelta al login
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
+  const handleLogout = async () => {
+    try {
+      await clearAllData();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const handleEditProfile = () => {
+    navigation.navigate('EditProfile', { userData: user, onUpdate: loadUserData });
   };
 
   const menuItems = [
@@ -72,27 +102,21 @@ export default function ProfileScreen({ navigation }) {
       </ScrollView>
 
       {/* User Card - Positioned absolutely on top */}
-      <View style={styles.userCard}>
-        {user.photo ? (
-          <Image source={user.photo} style={styles.userPhoto} />
-        ) : (
-          <View style={styles.userPhotoPlaceholder}>
-            <Image
-              source={{ uri: 'https://via.placeholder.com/60' }}
-              style={styles.userPhoto}
-            />
-          </View>
-        )}
+      <TouchableOpacity style={styles.userCard} onPress={handleEditProfile} activeOpacity={0.7}>
+        <Image
+          source={{ uri: user?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default' }}
+          style={styles.userPhoto}
+        />
         
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userPhone}>{user.phone}</Text>
+          <Text style={styles.userName}>{user?.name || 'Usuario'}</Text>
+          <Text style={styles.userPhone}>{user?.email || 'Email no disponible'}</Text>
         </View>
 
-        <TouchableOpacity style={styles.editButton}>
+        <View style={styles.editButton}>
           <Ionicons name="chevron-forward" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -101,6 +125,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     backgroundColor: COLORS.primary,

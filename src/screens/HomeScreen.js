@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, StatusBar, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { COLORS } from '../constants/colors';
+import { getUserData } from '../services/storage';
 
 export default function HomeScreen({ navigation }) {
   const [fontsLoaded] = useFonts({
@@ -12,10 +14,27 @@ export default function HomeScreen({ navigation }) {
     Manrope_700Bold,
   });
 
-  // Datos del usuario (temporal, luego vendrá de la BD)
-  const user = {
-    name: 'User',
-    photo: null, // Si tiene foto: require('../../assets/images/user.png')
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Recargar datos cuando la pantalla obtiene foco (regresa de otra pantalla)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadUserData();
+    }, [])
+  );
+
+  const loadUserData = async () => {
+    try {
+      const userData = await getUserData();
+      if (userData) {
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Recordatorios (temporal)
@@ -26,8 +45,12 @@ export default function HomeScreen({ navigation }) {
   // Amigos conectados (temporal)
   const friends = []; // Si está vacío, no se muestra la sección
 
-  if (!fontsLoaded) {
-    return null;
+  if (!fontsLoaded || loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
   }
 
   const getCurrentDate = () => {
@@ -49,13 +72,11 @@ export default function HomeScreen({ navigation }) {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            {user.photo ? (
-              <Image source={user.photo} style={styles.userPhoto} />
-            ) : (
-              <View style={styles.userPhotoPlaceholder}>
-                <Ionicons name="person" size={28} color={COLORS.primary} />
-              </View>
-            )}
+            <Image
+              source={{ uri: user?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/png?seed=default&size=200' }}
+              style={styles.userPhoto}
+              resizeMode="cover"
+            />
           </View>
           
           <View style={styles.headerRight}>
@@ -71,7 +92,7 @@ export default function HomeScreen({ navigation }) {
         {/* Date and Greeting */}
         <View style={styles.greetingSection}>
           <Text style={styles.dateText}>{getCurrentDate()}</Text>
-          <Text style={styles.greetingText}>Hola, {user.name}</Text>
+          <Text style={styles.greetingText}>Hola, {user?.name || 'Usuario'}</Text>
         </View>
 
         {/* Recordatorios */}
@@ -157,6 +178,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   scrollView: {
     flex: 1,
   },
@@ -178,6 +203,9 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    backgroundColor: '#F0F0F0',
   },
   userPhotoPlaceholder: {
     width: 50,

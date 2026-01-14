@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Image, Dimensions, Animated } from 'react-native';
 import { useFonts, Manrope_400Regular, Manrope_700Bold } from '@expo-google-fonts/manrope';
+import { getToken } from '../services/storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -41,9 +42,27 @@ export default function SplashScreen({ navigation }) {
         }),
       ]).start();
 
-      // Navegar al Login después de 3 segundos
+      // Verificar estado de autenticación
+      const checkAuthStatus = async () => {
+        try {
+          const token = await getToken();
+          
+          if (token) {
+            // Usuario tiene sesión activa - ir directo a Main
+            navigation.replace('Main');
+          } else {
+            // Sin sesión - ir al Login
+            navigation.replace('Login');
+          }
+        } catch (error) {
+          console.error('Error al verificar auth:', error);
+          navigation.replace('Login');
+        }
+      };
+
+      // Esperar 3 segundos para mostrar el splash y luego verificar
       const timer = setTimeout(() => {
-        navigation.replace('Login');
+        checkAuthStatus();
       }, 3000);
 
       return () => clearTimeout(timer);

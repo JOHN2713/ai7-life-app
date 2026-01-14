@@ -9,29 +9,45 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
+import { authAPI } from '../services/api';
+import { saveUserData } from '../services/storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Validación con usuario por defecto
-    if (email.toLowerCase() === 'admin' && password === 'admin123') {
-      navigation.replace('Onboarding');
-    } else {
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Por favor ingresa email y contraseña');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await authAPI.login(email.trim().toLowerCase(), password);
+      
+      // Guardar datos del usuario
+      await saveUserData(response.user);
+      
+      // Usuarios con cuenta existente van DIRECTO a Main (sin onboarding)
+      navigation.replace('Main');
+    } catch (error) {
       Alert.alert(
-        'Error de autenticación',
-        'Usuario o contraseña incorrectos.\n\nUsa: admin / admin123',
-        [{ text: 'OK' }]
+        'Error de Autenticación',
+        error.error || 'Credenciales incorrectas. Verifica tus datos.'
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,8 +146,16 @@ export default function LoginScreen({ navigation }) {
             </View>
 
             {/* Login Button */}
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>Login</Text>
+            <TouchableOpacity 
+              style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={COLORS.white} />
+              ) : (
+                <Text style={styles.loginButtonText}>Login</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -278,6 +302,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+  },
+  loginButtonDisabled: {
+    opacity: 0.6,
   },
   loginButtonText: {
     fontFamily: 'Manrope_700Bold',

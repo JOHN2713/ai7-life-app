@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { COLORS } from '../constants/colors';
+import { setOnboardingCompleted } from '../services/storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -105,8 +106,14 @@ export default function OnboardingScreen({ navigation }) {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      navigation.replace('Main');
+      // Última pantalla - marcar onboarding como completado y navegar a Main
+      handleComplete();
     }
+  };
+
+  const handleComplete = async () => {
+    await setOnboardingCompleted();
+    navigation.replace('Main');
   };
 
   const renderItem = ({ item, index }) => {

@@ -8,19 +8,77 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
+import { authAPI } from '../services/api';
+import { saveUserData } from '../services/storage';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    // Validaciones
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    if (!acceptTerms) {
+      Alert.alert('Error', 'Debes aceptar los términos y políticas de privacidad');
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert('Error', 'La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const userData = {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        birthDate: birthDate || null,
+      };
+
+      const response = await authAPI.register(userData);
+      
+      // Guardar datos del usuario
+      await saveUserData(response.user);
+      
+      // Usuario nuevo - mostrar onboarding
+      Alert.alert(
+        '¡Registro Exitoso!',
+        `Bienvenido ${response.user.name}`,
+        [
+          {
+            text: 'Continuar',
+            onPress: () => navigation.replace('Onboarding'),
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert(
+        'Error en el Registro',
+        error.error || 'No se pudo completar el registro. Intenta de nuevo.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   let [fontsLoaded] = useFonts({
     Manrope_400Regular,
@@ -110,6 +168,19 @@ export default function RegisterScreen({ navigation }) {
               </View>
             </View>
 
+            {/* Birth Date Input */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Fecha de Nacimiento (Opcional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="AAAA-MM-DD (ej: 1990-01-15)"
+                placeholderTextColor={COLORS.gray}
+                value={birthDate}
+                onChangeText={setBirthDate}
+                keyboardType="numbers-and-punctuation"
+              />
+            </View>
+
             {/* Terms Checkbox */}
             <TouchableOpacity 
               style={styles.termsContainer}
@@ -124,8 +195,16 @@ export default function RegisterScreen({ navigation }) {
             </TouchableOpacity>
 
             {/* Register Button */}
-            <TouchableOpacity style={styles.registerButton}>
-              <Text style={styles.registerButtonText}>Confirmar</Text>
+            <TouchableOpacity 
+              style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+              onPress={handleRegister}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={COLORS.white} />
+              ) : (
+                <Text style={styles.registerButtonText}>Confirmar</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -263,6 +342,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+  },
+  registerButtonDisabled: {
+    opacity: 0.6,
   },
   registerButtonText: {
     fontFamily: 'Manrope_700Bold',
