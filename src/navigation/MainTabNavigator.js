@@ -6,7 +6,7 @@ import { COLORS } from '../constants/colors';
 // Importar pantallas
 import HomeScreen from '../screens/HomeScreen';
 import GoalsScreen from '../screens/GoalsScreen';
-import ChatScreen from '../screens/ChatScreen';
+import ChatTabPlaceholder from '../screens/ChatTabPlaceholder';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
@@ -62,7 +62,16 @@ export default function MainTabNavigator() {
     >
       <Tab.Screen name="HomeTab" component={HomeScreen} />
       <Tab.Screen name="GoalsTab" component={GoalsScreen} />
-      <Tab.Screen name="ChatTab" component={ChatScreen} />
+      <Tab.Screen 
+        name="ChatTab" 
+        component={ChatTabPlaceholder}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('Chat');
+          },
+        })}
+      />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} />
     </Tab.Navigator>
   );
