@@ -3,12 +3,14 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { testConnection } = require('./config/database');
 
+
 // Cargar variables de entorno
 dotenv.config();
 
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
+const healthRoutes = require('./routes/healthRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/health', healthRoutes);
+
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -41,6 +45,19 @@ app.get('/health', async (req, res) => {
     status: 'ok',
     database: dbConnected ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    message: 'AI7 Life Health Module API',
+    endpoints: {
+      submit: 'POST /api/health/submit',
+      getData: 'GET /api/health',
+      update: 'PUT /api/health',
+      stats: 'GET /api/health/stats (admin)'
+    },
+    version: '1.0.0'
   });
 });
 

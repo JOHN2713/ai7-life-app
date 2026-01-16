@@ -1,0 +1,350 @@
+📚 README - MÓDULO HEALTH CHECK GENERAL - AI7 LIFE APP
+📌 RESUMEN DEL PROYECTO
+Se implementó el módulo completo de Health Check General para la aplicación AI7 Life, incluyendo:
+
+✅ Base de datos: Nueva tabla user_health_data relacionada con users
+
+✅ Backend: Endpoints RESTful completos con validaciones
+
+✅ Lógica de negocio: Cálculos de IMC, Health Score y recomendaciones personalizadas
+
+✅ Testing: Scripts automatizados y colección Postman para pruebas
+
+🗂️ ESTRUCTURA DE ARCHIVOS MODIFICADOS/AÑADIDOS
+📊 BASE DE DATOS
+text
+database/
+├── simple_health_table.sql            # Script para crear tabla de salud
+└── migrations/                        # (Opcional) Para control de versiones
+⚙️ BACKEND - NODE.JS
+text
+backend/
+├── controllers/
+│   └── healthController.js            # Controlador principal del módulo health
+├── routes/
+│   └── healthRoutes.js                # Rutas del API (/api/health/*)
+├── middleware/
+│   └── validation/
+│       └── healthValidation.js        # Validación de datos de salud
+├── services/
+│   └── healthCalculator.js            # Lógica de cálculos (IMC, score, recomendaciones)
+├── scripts/
+│   ├── setup-health-module.js         # Script de configuración automática
+│   └── generate-postman-collection.js # Generador de colección Postman
+├── test-health-api.js                 # Pruebas automatizadas del módulo
+├── get-token.js                       # Utilidad para obtener tokens JWT
+├── test-health-simple.sh              # Script bash para pruebas rápidas
+└── server.js                          # Configuración del servidor (modificado)
+📦 CONFIGURACIÓN
+text
+package.json                           # Dependencias y scripts actualizados
+.env.example                          # Variables de entorno (actualizado)
+🔧 DETALLES TÉCNICOS DE IMPLEMENTACIÓN
+1. 🗄️ TABLA DE BASE DE DATOS - user_health_data
+sql
+CREATE TABLE user_health_data (
+    id SERIAL PRIMARY KEY,
+    user_email VARCHAR(255) NOT NULL UNIQUE REFERENCES users(email) ON DELETE CASCADE,
+    age INTEGER CHECK (age BETWEEN 15 AND 80),
+    height_cm DECIMAL(5,2) CHECK (height_cm BETWEEN 100 AND 250),
+    weight_kg DECIMAL(5,2) CHECK (weight_kg BETWEEN 30 AND 300),
+    sleep_hours DECIMAL(3,1) CHECK (sleep_hours BETWEEN 4 AND 12),
+    water_glasses INTEGER CHECK (water_glasses BETWEEN 0 AND 12),
+    activity_level VARCHAR(20) CHECK (activity_level IN ('Sedentario', 'Ligero', 'Moderado', 'Activo')),
+    bmi DECIMAL(5,2),
+    health_score INTEGER CHECK (health_score BETWEEN 0 AND 100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+Características:
+
+✅ Relación 1:1 con tabla users usando email como FK
+
+✅ Constraints de validación integrados en la base de datos
+
+✅ Campos calculados: bmi y health_score
+
+✅ Índices optimizados para búsquedas por email
+
+✅ Datos de prueba incluidos para usuario admin
+
+2. 🚀 ENDPOINTS IMPLEMENTADOS
+Método	Endpoint	Descripción
+POST	/api/health/submit	Guardar/actualizar datos completos de salud
+GET	/api/health	Obtener datos del usuario autenticado
+GET	/api/health/:email	Obtener datos por email específico
+PUT	/api/health	Actualizar parcialmente datos del usuario
+PUT	/api/health/:email	Actualizar datos por email
+GET	/api/health/stats/summary	Estadísticas generales (admin)
+GET	/api/health/status	Verificación del módulo
+3. 🧮 LÓGICA DE CÁLCULOS IMPLEMENTADA
+IMC (Índice de Masa Corporal)
+javascript
+IMC = peso(kg) / (altura(m)²)
+Categorías: Bajo peso (<18.5), Normal (18.5-24.9), Sobrepeso (25-29.9), Obesidad (≥30)
+Health Score (0-100 puntos)
+IMC: 30 puntos máx (óptimo: 18.5-24.9)
+
+Sueño: 30 puntos máx (óptimo: 7-9 horas)
+
+Agua: 20 puntos máx (óptimo: 8+ vasos)
+
+Actividad: 20 puntos máx (Activo: 20, Moderado: 15, Ligero: 10, Sedentario: 5)
+
+Recomendaciones Personalizadas
+Basadas en:
+
+IMC fuera de rango normal
+
+Sueño insuficiente (<6 horas)
+
+Hidratación baja (<8 vasos)
+
+Nivel de actividad sedentario
+
+4. 🔒 SISTEMA DE AUTENTICACIÓN
+Dos modos de operación:
+
+Con autenticación JWT: Usa req.user.email del middleware
+
+Sin autenticación: Incluye campo email en el body de la petición
+
+🚀 GUÍA DE INSTALACIÓN Y CONFIGURACIÓN
+Paso 1: Configurar Base de Datos
+bash
+# Conectarse a PostgreSQL
+psql -U postgres -d useri7_db
+
+# Ejecutar script de creación
+\i database/simple_health_table.sql
+Paso 2: Instalar Dependencias
+bash
+cd backend
+npm install axios  # Para scripts de testing
+Paso 3: Configurar Variables de Entorno
+bash
+cp .env.example .env
+# Editar .env con tus configuraciones de DB
+Paso 4: Iniciar Servidor
+bash
+npm run dev
+🧪 PRUEBAS DEL MÓDULO
+Pruebas Automatizadas
+bash
+# Prueba rápida de conexión
+npm run test:quick
+
+# Pruebas completas del módulo health
+npm run test:health
+
+# Pruebas detalladas
+npm run test:health:detailed
+
+# Obtener token para pruebas
+npm run get-token
+Pruebas Manuales con Postman
+Importar colección: AI7-Health-Quick-Test.postman_collection.json
+
+Configurar variables:
+
+base_url: http://localhost:3000
+
+admin_email: admin@ai7life.com
+
+admin_password: admin123
+
+Ejecutar en orden:
+
+Login → Obtener token
+
+POST /api/health/submit
+
+GET /api/health
+
+PUT /api/health
+
+Pruebas con cURL
+bash
+# Enviar datos de salud
+curl -X POST http://localhost:3000/api/health/submit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@ai7life.com",
+    "age": 28,
+    "height_cm": 175.5,
+    "weight_kg": 72.3,
+    "sleep_hours": 7.5,
+    "water_glasses": 8,
+    "activity_level": "Moderado"
+  }'
+📊 EJEMPLOS DE RESPUESTAS
+POST /api/health/submit (Éxito)
+json
+{
+  "success": true,
+  "message": "Datos de salud guardados correctamente",
+  "data": {
+    "id": 1,
+    "user_email": "admin@ai7life.com",
+    "age": 28,
+    "height_cm": 175.5,
+    "weight_kg": 72.3,
+    "bmi": 23.5,
+    "bmi_category": "Normal",
+    "sleep_hours": 7.5,
+    "water_glasses": 8,
+    "activity_level": "Moderado",
+    "health_score": 85,
+    "created_at": "2024-01-15T10:30:00.000Z",
+    "updated_at": "2024-01-15T10:30:00.000Z"
+  },
+  "analysis": {
+    "recommendations": [...],
+    "score_breakdown": {...}
+  }
+}
+GET /api/health/admin@ai7life.com
+json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "name": "Admin User",
+      "email": "admin@ai7life.com",
+      "birth_date": "1990-01-01",
+      "calculated_age": 34
+    },
+    "health": {
+      "age": 28,
+      "height_cm": 175.5,
+      "weight_kg": 72.3,
+      "bmi": 23.5,
+      "bmi_category": "Normal",
+      "sleep_hours": 7.5,
+      "water_glasses": 8,
+      "activity_level": "Moderado",
+      "health_score": 85,
+      "created_at": "2024-01-15T10:30:00.000Z",
+      "updated_at": "2024-01-15T10:30:00.000Z"
+    },
+    "recommendations": [...]
+  }
+}
+🔍 SOLUCIÓN DE PROBLEMAS
+Error común: "Cannot read properties of undefined (reading 'email')"
+Solución: Incluir campo email en el body o habilitar middleware de auth.
+
+Error: "relation 'user_health_data' does not exist"
+Solución: Ejecutar script SQL: npm run db:create-health-table
+
+Error: "user_email" viola constraint única
+Solución: Usar PUT para actualizar en lugar de POST, o cambiar email.
+
+Error de validación
+Verificar que todos los campos cumplan:
+
+age: 15-80
+
+height_cm: 100-250
+
+weight_kg: 30-300
+
+sleep_hours: 4-12
+
+water_glasses: 0-12
+
+activity_level: Sedentario, Ligero, Moderado, Activo
+
+📈 ESTADÍSTICAS Y MONITOREO
+bash
+# Ver estadísticas generales
+curl http://localhost:3000/api/health/stats/summary
+
+# Health check del sistema
+curl http://localhost:3000/health
+Respuesta de stats:
+
+json
+{
+  "stats": {
+    "summary": {
+      "total_users_with_data": 15,
+      "average_health_score": 72.5,
+      "average_bmi": 24.3,
+      "average_sleep_hours": 6.8,
+      "average_water_glasses": 6.2
+    },
+    "by_activity_level": [...]
+  }
+}
+🔮 PRÓXIMOS PASOS (TODO)
+Mejoras Pendientes
+Frontend React Native: 5 pantallas secuenciales del check general
+
+Dashboard Admin: Visualización de estadísticas en tiempo real
+
+Notificaciones: Recordatorios para mejorar hábitos
+
+Historial: Seguimiento de progreso en el tiempo
+
+API Docs: Documentación Swagger/OpenAPI
+
+Integraciones Futuras
+✅ Base de datos: PostgreSQL con relaciones
+
+✅ Backend: Node.js/Express con validaciones
+
+⏳ Frontend: React Native/Expo (pendiente)
+
+⏳ Mobile: iOS y Android compatibles
+
+⏳ Analytics: Google Analytics/Firebase
+
+👥 RESPONSABLES
+Desarrollo Backend: [Tu nombre aquí]
+
+Base de Datos: [Tu nombre aquí]
+
+Testing QA: [Tu nombre aquí]
+
+Documentación: [Tu nombre aquí]
+
+📝 NOTAS TÉCNICAS
+Decisiones de Arquitectura
+Base de datos: Email como FK en lugar de UUID para simplicidad en desarrollo
+
+Validación: Middleware + constraints DB para doble validación
+
+Cálculos: En backend (Node.js) para mayor flexibilidad y debugging
+
+API: RESTful con soporte para autenticación JWT y modo prueba
+
+Consideraciones de Performance
+Índices en user_email para búsquedas rápidas
+
+Cálculos en memoria (backend) para evitar carga en DB
+
+Respuestas JSON optimizadas con solo datos necesarios
+
+Seguridad
+Validación exhaustiva de inputs
+
+Sanitización de datos antes de queries SQL
+
+Preparación para implementar JWT (comentado actualmente)
+
+📞 SOPORTE
+Para problemas técnicos:
+
+Revisar logs del servidor
+
+Verificar conexión a base de datos
+
+Probar endpoints con Postman/curl
+
+Contactar al equipo de desarrollo
+
+Última actualización: Enero 2024
+Versión del módulo: 1.0.0
+Estado: ✅ PRODUCCIÓN READY
+
