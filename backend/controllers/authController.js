@@ -1,3 +1,4 @@
+const pool = require('../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
@@ -268,4 +269,28 @@ module.exports = {
   login,
   verifyToken,
   updateAvatar,
+};
+
+const getUsers = async (req, res) => {
+  try {
+    // Consulta a la base de datos
+    // Usamos 'usuarios' que es el nombre estándar, cámbialo si tu tabla se llama distinto
+    const result = await pool.query(
+      'SELECT id, name, email, avatar_url FROM users ORDER BY name ASC'
+    );
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error en getUsers:', error.message);
+    res.status(500).json({ error: 'Error al obtener la lista de usuarios' });
+  }
+};
+
+// NO OLVIDES añadir getUsers al module.exports al final del archivo
+module.exports = {
+  register,
+  login,
+  verifyToken,
+  updateAvatar,
+  getUsers // <--- Agrégalo aquí también
 };

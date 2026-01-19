@@ -1,7 +1,13 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from './apiConfig';
-import { saveToken, saveUserData } from './storage';
+// Importamos las funciones necesarias de tu storage.js
+import { 
+  getToken, 
+  clearAllData, 
+  saveToken, 
+  saveUserData, 
+  getUserData 
+} from './storage';
 
 // Crear instancia de axios
 const api = axios.create({
@@ -15,25 +21,27 @@ const api = axios.create({
 // Interceptor para agregar el token a todas las peticiones
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      // Usamos la función del storage que ya tiene la clave @ai7life:token
+      const token = await getToken(); 
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Error en interceptor de petición:', error);
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Interceptor para manejar errores de respuesta
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Si el servidor responde 401 (No autorizado), limpiamos los datos locales
     if (error.response?.status === 401) {
-      // Token expirado o inválido
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
+      await clearAllData();
     }
     return Promise.reject(error);
   }
@@ -45,12 +53,14 @@ export const authAPI = {
   register: async (userData) => {
     try {
       const response = await api.post('/auth/register', userData);
+      // Si el registro devuelve token, guardamos todo automáticamente
       if (response.data.token) {
         await saveToken(response.data.token);
         await saveUserData(response.data.user);
       }
       return response.data;
     } catch (error) {
+      console.error('Error en authAPI.register:', error.message);
       throw error.response?.data || { error: 'Error de conexión' };
     }
   },
@@ -59,17 +69,22 @@ export const authAPI = {
   login: async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
+      
+      // Al recibir el 200 OK del servidor (que ya vimos en tus logs):
       if (response.data.token) {
+        // Guardamos con las claves correctas de storage.js
         await saveToken(response.data.token);
         await saveUserData(response.data.user);
       }
       return response.data;
     } catch (error) {
+      console.error('Error en authAPI.login:', error.message);
+      // Si llegamos aquí es porque algo falló en la red o el guardado
       throw error.response?.data || { error: 'Error de conexión' };
     }
   },
 
-  // Verificar token
+  // Verificar token activo
   verifyToken: async () => {
     try {
       const response = await api.get('/auth/verify');
@@ -94,33 +109,23 @@ export const authAPI = {
 
   // Cerrar sesión
   logout: async () => {
-    await AsyncStorage.removeItem('token');
-    await AsyncStorage.removeItem('user');
+    await clearAllData();
   },
 
-  // Obtener usuario guardado
+  // Obtener usuario guardado localmente
   getStoredUser: async () => {
-    try {
-      const userStr = await AsyncStorage.getItem('user');
-      return userStr ? JSON.parse(userStr) : null;
-    } catch (error) {
-      return null;
-    }
+    return await getUserData();
   },
 
-  // Obtener token guardado
+  // Obtener token guardado localmente
   getStoredToken: async () => {
-    try {
-      return await AsyncStorage.getItem('token');
-    } catch (error) {
-      return null;
-    }
+    return await getToken();
   },
 };
 
 // Funciones de chat
 export const chatAPI = {
-  // Enviar mensaje al chat
+  // Enviar mensaje
   sendMessage: async (message, conversationHistory = []) => {
     try {
       const response = await api.post('/chat/message', {
@@ -133,7 +138,7 @@ export const chatAPI = {
     }
   },
 
-  // Obtener mensaje de bienvenida
+  // Obtener bienvenida
   getWelcomeMessage: async () => {
     try {
       const response = await api.get('/chat/welcome');

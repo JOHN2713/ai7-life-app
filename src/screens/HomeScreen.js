@@ -150,7 +150,24 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.cardText}>Nuevos{'\n'}Retos</Text>
             </TouchableOpacity>
           </View>
+
+        {/* Segunda Fila: Lista Amigos */}
+        <View style={[styles.cardsRow, { justifyContent: 'flex-start', marginTop: 20 }]}>
+          <TouchableOpacity 
+            style={styles.card}
+            onPress={() => navigation.navigate('FriendsList')} // Te dirige a la lista de amigos
+          >
+            <View style={[styles.cardIcon, { backgroundColor: '#E1F5E8' }]}>
+              <Ionicons name="list-outline" size={28} color="#10B981" />
+            </View>
+            <Text style={[styles.cardText, { color: '#064E3B', fontFamily: 'Manrope_700Bold' }]}>
+              Amigos
+            </Text>
+          </TouchableOpacity>
         </View>
+      </View>
+
+
 
         {/* Top Amigos AI7 - Solo si hay amigos */}
         {friends.length > 0 && (

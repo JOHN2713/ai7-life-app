@@ -10,6 +10,8 @@ dotenv.config();
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
 
+const morgan = require('morgan');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -20,6 +22,8 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(morgan('dev'));
 
 // Rutas
 app.use('/api/auth', authRoutes);
@@ -73,7 +77,7 @@ const startServer = async () => {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n🚀 Servidor corriendo en:`);
       console.log(`   http://localhost:${PORT}`);
-      console.log(`   http://192.168.1.214:${PORT}`);
+      console.log(`   http://192.168.100.13:${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
       console.log(`🗄️  Database: ${process.env.DB_NAME}`);
       console.log(`\n📍 Endpoints disponibles:`);

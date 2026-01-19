@@ -8,8 +8,10 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
-import ChatScreen from '../screens/ChatScreen';
+// CAMBIO: Importamos el nuevo archivo que creamos
+import ChatScreenList from '../screens/ChatScreenList'; 
 import MainTabNavigator from './MainTabNavigator';
+import FriendsListScreen from '../screens/FriendsListScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,7 +30,11 @@ export default function AppNavigator() {
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-        <Stack.Screen name="Chat" component={ChatScreen} />
+        
+        {/* CAMBIO: Usamos el nombre 'ChatDetail' para la conversación individual */}
+        <Stack.Screen name="ChatDetail" component={ChatScreenList} />
+        
+        <Stack.Screen name="FriendsList" component={FriendsListScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

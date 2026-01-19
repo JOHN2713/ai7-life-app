@@ -17,7 +17,8 @@ import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } fr
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import { authAPI } from '../services/api';
-import { saveUserData } from '../services/storage';
+
+import { saveToken, saveUserData } from '../services/storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -33,19 +34,40 @@ export default function LoginScreen({ navigation }) {
     }
 
     setLoading(true);
+    
     try {
       const response = await authAPI.login(email.trim().toLowerCase(), password);
       
-      // Guardar datos del usuario
-      await saveUserData(response.user);
-      
-      // Usuarios con cuenta existente van DIRECTO a Main (sin onboarding)
-      navigation.replace('Main');
+      if (response && (response.token || response.user)) {
+        console.log("✅ Datos recibidos del servidor");
+
+        // Guardamos los datos usando las funciones de storage
+        if (response.user) await saveUserData(response.user);
+        if (response.token) await saveToken(response.token); 
+
+        console.log("💾 Storage actualizado. Navegando...");
+
+        // Usamos reset para limpiar el historial y entrar a la Home
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      } else {
+        throw new Error('Respuesta del servidor incompleta');
+      }
     } catch (error) {
-      Alert.alert(
-        'Error de Autenticación',
-        error.error || 'Credenciales incorrectas. Verifica tus datos.'
-      );
+      console.error("❌ Error en el proceso de Login:", error);
+      
+      let errorMessage = 'Credenciales incorrectas.';
+      if (error.message === 'Network Error') {
+        errorMessage = 'Error de conexión con el servidor.';
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error.error) {
+        errorMessage = error.error;
+      }
+
+      Alert.alert('Error de Autenticación', errorMessage);
     } finally {
       setLoading(false);
     }
