@@ -9,6 +9,9 @@ dotenv.config();
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
+const goalsRoutes = require('./routes/goals');
+const reminderRoutes = require('./routes/reminders');
+const friendsRoutes = require('./routes/friends');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +27,9 @@ app.use(express.urlencoded({ extended: true }));
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/goals', goalsRoutes);
+app.use('/api/reminders', reminderRoutes);
+app.use('/api/friends', friendsRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -81,6 +87,9 @@ const startServer = async () => {
       console.log(`   GET  /health        - Health check`);
       console.log(`   POST /api/auth/register - Registrar usuario`);
       console.log(`   POST /api/auth/login    - Iniciar sesión`);
+      console.log(`   GET  /api/goals         - Obtener metas`);
+      console.log(`   POST /api/goals         - Crear meta`);
+      console.log(`   GET  /api/goals/templates - Plantillas de metas`);
       console.log(`\n✨ Listo para recibir peticiones!\n`);
     });
   } catch (error) {
