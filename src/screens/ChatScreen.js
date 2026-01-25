@@ -113,17 +113,19 @@ export default function ChatScreen({ navigation }) {
       }, 100);
     } catch (error) {
       console.error('Error al enviar mensaje:', error);
-      Alert.alert(
-        'Error',
-        error.error || 'No se pudo enviar el mensaje. Verifica tu conexión.',
-        [{ text: 'OK' }]
-      );
+      
+      let errorContent = 'Lo siento, tuve un problema al procesar tu mensaje. Por favor, intenta de nuevo.';
+      
+      // Si es error de cuota, usar mensaje más específico
+      if (error.error?.includes('Límite') || error.message?.includes('Límite')) {
+        errorContent = 'Estoy experimentando alta demanda en este momento. Por favor, intenta nuevamente en unos minutos. ⏰';
+      }
 
-      // Mensaje de error
+      // Mensaje de error en el chat (sin alert para mejor UX)
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Lo siento, tuve un problema al procesar tu mensaje. Por favor, intenta de nuevo.',
+        content: errorContent,
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -160,7 +162,7 @@ export default function ChatScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -196,8 +198,8 @@ export default function ChatScreen({ navigation }) {
 
       {/* Input */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <View style={styles.inputContainer}>
           <TextInput

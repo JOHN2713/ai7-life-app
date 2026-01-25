@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { COLORS } from '../constants/colors';
 import { getUserData } from '../services/storage';
+import { goalsAPI } from '../services/api';
 
 export default function HomeScreen({ navigation }) {
   const [fontsLoaded] = useFonts({
@@ -16,11 +17,13 @@ export default function HomeScreen({ navigation }) {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [goals, setGoals] = useState([]);
 
   // Recargar datos cuando la pantalla obtiene foco (regresa de otra pantalla)
   useFocusEffect(
     React.useCallback(() => {
       loadUserData();
+      loadGoals();
     }, [])
   );
 
@@ -37,13 +40,40 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  // Recordatorios (temporal)
-  const reminders = [
-    { id: 1, title: 'Correr 30 min.', time: '14:30 PM', icon: 'walk' }
-  ];
+  const loadGoals = async () => {
+    try {
+      console.log('🏠 Cargando metas en HomeScreen...');
+      const response = await goalsAPI.getUserGoals(true); // Solo metas activas
+      console.log('✅ Respuesta de metas:', response);
+      
+      if (response.success && response.goals) {
+        console.log('📊 Metas activas encontradas:', response.goals.length);
+        setGoals(response.goals);
+      } else {
+        console.log('⚠️ No se encontraron metas');
+        setGoals([]);
+      }
+    } catch (error) {
+      console.error('❌ Error al cargar metas en HomeScreen:', error);
+      setGoals([]);
+    }
+  };
 
   // Amigos conectados (temporal)
   const friends = []; // Si está vacío, no se muestra la sección
+
+  // Iconos de metas
+  const GOAL_ICONS = {
+    walk: 'walk',
+    tooth: 'brush',
+    book: 'book',
+    water: 'water',
+    fitness: 'barbell',
+    meditation: 'leaf',
+    study: 'school',
+    sleep: 'moon',
+    custom: 'flag'
+  };
 
   if (!fontsLoaded || loading) {
     return (
@@ -80,7 +110,10 @@ export default function HomeScreen({ navigation }) {
           </View>
           
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity 
+              style={styles.iconButton}
+              onPress={() => navigation.navigate('Notifications')}
+            >
               <Ionicons name="notifications" size={24} color={COLORS.white} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton}>
@@ -95,59 +128,87 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.greetingText}>Hola, {user?.name || 'Usuario'}</Text>
         </View>
 
-        {/* Recordatorios */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recordatorio</Text>
-            {reminders.length > 0 && (
-              <TouchableOpacity>
-                <Text style={styles.clearButton}>Limpiar</Text>
+        {/* Mis Metas Activas */}
+        {goals.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Mis Metas Activas</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('GoalsTab')}>
+                <Text style={styles.seeAllButton}>Ver todas</Text>
               </TouchableOpacity>
-            )}
-          </View>
-
-          {reminders.length > 0 ? (
-            reminders.map((reminder) => (
-              <View key={reminder.id} style={styles.reminderCard}>
-                <View style={styles.reminderLeft}>
-                  <View style={styles.reminderIcon}>
-                    <Ionicons name={reminder.icon} size={20} color={COLORS.primary} />
-                  </View>
-                  <Text style={styles.reminderText}>{reminder.title}</Text>
-                </View>
-                <Text style={styles.reminderTime}>{reminder.time}</Text>
-              </View>
-            ))
-          ) : (
-            <View style={styles.emptyCard}>
-              <Text style={styles.emptyText}>Aún no has establecido retos hoy</Text>
             </View>
-          )}
-        </View>
+
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.goalsScrollContainer}
+            >
+              {goals.slice(0, 5).map((goal) => (
+                <TouchableOpacity 
+                  key={goal.id} 
+                  style={styles.goalCardMini}
+                  onPress={() => navigation.navigate('GoalDetail', { goalId: goal.id })}
+                >
+                  <View style={[styles.goalIconMini, { backgroundColor: goal.color + '20' }]}>
+                    <Ionicons
+                      name={GOAL_ICONS[goal.icon] || 'flag'}
+                      size={24}
+                      color={goal.color}
+                    />
+                  </View>
+                  <Text style={styles.goalNameMini} numberOfLines={2}>{goal.name}</Text>
+                  <View style={styles.progressBarMini}>
+                    <View style={[styles.progressFillMini, { width: `${goal.progress}%`, backgroundColor: goal.color }]} />
+                  </View>
+                  <Text style={styles.goalProgressText}>{goal.progress}%</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Qué estás buscando */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Qué estás buscando?</Text>
           <View style={styles.cardsRow}>
-            <TouchableOpacity style={styles.card}>
+            <TouchableOpacity 
+              style={styles.card}
+              onPress={() => navigation.navigate('Dashboard')}
+            >
               <View style={[styles.cardIcon, { backgroundColor: '#E8E8FF' }]}>
                 <Ionicons name="clipboard-outline" size={28} color="#5B5BD6" />
               </View>
               <Text style={styles.cardText}>Check{'\n'}General</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.card}>
+            <TouchableOpacity 
+              style={styles.card}
+              onPress={() => navigation.navigate('Chat')}
+            >
               <View style={[styles.cardIcon, { backgroundColor: '#FFE8E8' }]}>
                 <Ionicons name="chatbubbles-outline" size={28} color="#D65B5B" />
               </View>
               <Text style={styles.cardText}>Chat con{'\n'}Coach</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.card}>
+            <TouchableOpacity 
+              style={styles.card}
+              onPress={() => navigation.navigate('GoalsTab', { screen: 'CreateGoal' })}
+            >
               <View style={[styles.cardIcon, { backgroundColor: '#E8FFF5' }]}>
                 <Ionicons name="trophy-outline" size={28} color={COLORS.primary} />
               </View>
               <Text style={styles.cardText}>Nuevos{'\n'}Retos</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.card}
+              onPress={() => navigation.navigate('Friends')}
+            >
+              <View style={[styles.cardIcon, { backgroundColor: '#FFF3E0' }]}>
+                <Ionicons name="people-outline" size={28} color="#FF9800" />
+              </View>
+              <Text style={styles.cardText}>Mis{'\n'}Amigos</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -259,50 +320,60 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: COLORS.black,
   },
-  clearButton: {
+  seeAllButton: {
     fontFamily: 'Manrope_600SemiBold',
     fontSize: 14,
-    color: '#FF6B6B',
+    color: COLORS.primary,
   },
-  reminderCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  goalsScrollContainer: {
+    paddingRight: 20,
+  },
+  goalCardMini: {
+    width: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
+    marginRight: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
-    shadowColor: '#000000ff',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
-  reminderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  reminderIcon: {
-    width: 36,
-    height: 36,
+  goalIconMini: {
+    width: 40,
+    height: 40,
     borderRadius: 10,
-    backgroundColor: '#E8FFF5',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginBottom: 8,
   },
-  reminderText: {
+  goalNameMini: {
     fontFamily: 'Manrope_600SemiBold',
-    fontSize: 15,
+    fontSize: 13,
     color: COLORS.black,
-    flex: 1,
+    marginBottom: 8,
+    height: 36,
   },
-  reminderTime: {
+  progressBarMini: {
+    width: '100%',
+    height: 6,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  progressFillMini: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  goalProgressText: {
     fontFamily: 'Manrope_600SemiBold',
-    fontSize: 14,
-    color: COLORS.primary,
+    fontSize: 11,
+    color: COLORS.gray,
+    textAlign: 'center',
   },
   emptyCard: {
     backgroundColor: COLORS.lightGray,
