@@ -1,8 +1,23 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
+import notificationService from './src/services/notificationService';
 
 export default function App() {
+  useEffect(() => {
+    // Inicializar el servicio de notificaciones al arrancar la app
+    const initNotifications = async () => {
+      try {
+        await notificationService.initialize();
+        console.log('✅ Sistema de notificaciones inicializado');
+      } catch (error) {
+        console.error('⚠️ Error al inicializar notificaciones:', error);
+      }
+    };
+
+    initNotifications();
+  }, []);
+
   return (
     <>
       <AppNavigator />
