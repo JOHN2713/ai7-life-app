@@ -1,3 +1,4 @@
+const pool = require('../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
@@ -263,9 +264,23 @@ const updateAvatar = async (req, res) => {
   }
 };
 
+// Obtener lista de usuarios para la lista de amigos
+const getUsers = async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, name, email, avatar_url FROM users ORDER BY name ASC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error en getUsers:', error.message);
+    res.status(500).json({ error: 'Error al obtener la lista de usuarios' });
+  }
+};
+
 module.exports = {
   register,
   login,
   verifyToken,
   updateAvatar,
+  getUsers
 };
