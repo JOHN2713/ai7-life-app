@@ -1,16 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Image, Dimensions, Animated } from 'react-native';
 import { useFonts, Manrope_400Regular, Manrope_700Bold } from '@expo-google-fonts/manrope';
+// Importamos el servicio de almacenamiento para verificar la sesión
 import { getToken } from '../services/storage';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SplashScreen({ navigation }) {
-  // Valores animados
+  // 1. Valores animados
   const logoScale = useRef(new Animated.Value(0)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
   const textTranslateY = useRef(new Animated.Value(30)).current;
 
+  // 2. Carga de fuentes
   let [fontsLoaded] = useFonts({
     Manrope_400Regular,
     Manrope_700Bold,
@@ -18,49 +20,11 @@ export default function SplashScreen({ navigation }) {
 
   useEffect(() => {
     if (fontsLoaded) {
-      // Animación del logo (zoom-in)
-      Animated.spring(logoScale, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }).start();
+      // 3. Iniciar Animaciones Visuales
+      startAnimations();
 
-      // Animación del texto (fade-up) con delay
-      Animated.parallel([
-        Animated.timing(textOpacity, {
-          toValue: 1,
-          duration: 800,
-          delay: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(textTranslateY, {
-          toValue: 0,
-          duration: 800,
-          delay: 400,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Verificar estado de autenticación
-      const checkAuthStatus = async () => {
-        try {
-          const token = await getToken();
-          
-          if (token) {
-            // Usuario tiene sesión activa - ir directo a Main
-            navigation.replace('Main');
-          } else {
-            // Sin sesión - ir al Login
-            navigation.replace('Login');
-          }
-        } catch (error) {
-          console.error('Error al verificar auth:', error);
-          navigation.replace('Login');
-        }
-      };
-
-      // Esperar 3 segundos para mostrar el splash y luego verificar
+      // 4. Temporizador + Lógica de Autenticación
+      // Esperamos 3 segundos para que se aprecie el logo y luego verificamos
       const timer = setTimeout(() => {
         checkAuthStatus();
       }, 3000);
@@ -68,6 +32,51 @@ export default function SplashScreen({ navigation }) {
       return () => clearTimeout(timer);
     }
   }, [fontsLoaded, navigation]);
+
+  const startAnimations = () => {
+    // Animación del logo (zoom-in con rebote)
+    Animated.spring(logoScale, {
+      toValue: 1,
+      tension: 50,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
+
+    // Animación del texto (aparece y sube)
+    Animated.parallel([
+      Animated.timing(textOpacity, {
+        toValue: 1,
+        duration: 800,
+        delay: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(textTranslateY, {
+        toValue: 0,
+        duration: 800,
+        delay: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const checkAuthStatus = async () => {
+    try {
+      // Verificamos si existe un token guardado en el celular
+      const token = await getToken();
+      
+      if (token) {
+        // Usuario tiene sesión activa -> Ir directo a la App
+        navigation.replace('Main');
+      } else {
+        // No hay sesión -> Ir al Login
+        navigation.replace('Login');
+      }
+    } catch (error) {
+      console.error('Error al verificar auth:', error);
+      // Por seguridad, si falla algo, enviamos al Login
+      navigation.replace('Login');
+    }
+  };
 
   if (!fontsLoaded) {
     return null;
@@ -79,9 +88,7 @@ export default function SplashScreen({ navigation }) {
       <Animated.View 
         style={[
           styles.logoContainer,
-          {
-            transform: [{ scale: logoScale }],
-          }
+          { transform: [{ scale: logoScale }] }
         ]}
       >
         <Image
@@ -91,7 +98,7 @@ export default function SplashScreen({ navigation }) {
         />
       </Animated.View>
 
-      {/* Texto con animación fade-up */}
+      {/* Título (AI7 Life) con animación fade-up */}
       <Animated.View 
         style={[
           styles.titleContainer,
@@ -147,7 +154,7 @@ const styles = StyleSheet.create({
   titleAI7: {
     fontFamily: 'Manrope_700Bold',
     fontSize: 48,
-    color: '#00B89F', // Color turquesa/verde azulado
+    color: '#00B89F', // Color turquesa de tu marca
     fontWeight: 'bold',
   },
   titleLife: {

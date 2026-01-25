@@ -9,6 +9,9 @@ dotenv.config();
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
+const healthRoutes = require('./routes/healthRoutes');
+
+const morgan = require('morgan');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,9 +24,13 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(morgan('dev'));
+
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/user-chat', require('./routes/userChat'));
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -41,6 +48,19 @@ app.get('/health', async (req, res) => {
     status: 'ok',
     database: dbConnected ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    message: 'AI7 Life Health Module API',
+    endpoints: {
+      submit: 'POST /api/health/submit',
+      getData: 'GET /api/health',
+      update: 'PUT /api/health',
+      stats: 'GET /api/health/stats (admin)'
+    },
+    version: '1.0.0'
   });
 });
 
@@ -73,7 +93,7 @@ const startServer = async () => {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n🚀 Servidor corriendo en:`);
       console.log(`   http://localhost:${PORT}`);
-      console.log(`   http://192.168.1.214:${PORT}`);
+      console.log(`   http://192.168.100.13:${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
       console.log(`🗄️  Database: ${process.env.DB_NAME}`);
       console.log(`\n📍 Endpoints disponibles:`);

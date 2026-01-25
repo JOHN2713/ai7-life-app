@@ -16,7 +16,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
-import { authAPI } from '../services/api';
+
+// Intentamos importar los servicios, si no existen, no romperá la app inmediatamente
+// Asegúrate de tener estos archivos creados o comenta las líneas si aún no los tienes
+import { authAPI } from '../services/api'; 
 import { saveUserData } from '../services/storage';
 
 export default function LoginScreen({ navigation }) {
@@ -26,36 +29,65 @@ export default function LoginScreen({ navigation }) {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Por favor ingresa email y contraseña');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await authAPI.login(email.trim().toLowerCase(), password);
-      
-      // Guardar datos del usuario
-      await saveUserData(response.user);
-      
-      // Usuarios con cuenta existente van DIRECTO a Main (sin onboarding)
-      navigation.replace('Main');
-    } catch (error) {
-      Alert.alert(
-        'Error de Autenticación',
-        error.error || 'Credenciales incorrectas. Verifica tus datos.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Carga de fuentes
   let [fontsLoaded] = useFonts({
     Manrope_400Regular,
     Manrope_600SemiBold,
     Manrope_700Bold,
   });
+
+  const handleLogin = async () => {
+    // 1. Validación básica
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Campos vacíos', 'Por favor ingresa tu email y contraseña.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // ---------------------------------------------------------
+      // 2. PUERTA TRASERA PARA DESARROLLADOR (Del código antiguo)
+      // ---------------------------------------------------------
+      // Esto te permite entrar si el servidor falla o para pruebas rápidas UI
+      if (email.trim().toLowerCase() === 'admin' && password === 'admin123') {
+        // Simulamos una espera de red
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
+        
+        // Creamos un usuario falso para que la app funcione
+        const mockUser = { 
+          name: 'Admin Developer', 
+          email: 'admin@test.com', 
+          avatar_url: null 
+        };
+        
+        // Guardamos y navegamos (si tienes saveUserData implementado)
+        try { await saveUserData(mockUser); } catch(e) { console.log("Storage no listo"); }
+        
+        navigation.replace('Main'); // O 'Onboarding' si prefieres probar eso
+        return; 
+      }
+      // ---------------------------------------------------------
+
+      // 3. Intento de Login REAL (Del código nuevo)
+      const response = await authAPI.login(email.trim().toLowerCase(), password);
+      
+      // Guardar datos del usuario real
+      await saveUserData(response.user);
+      
+      // Navegar a la pantalla principal
+      navigation.replace('Main');
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        'Error de Autenticación',
+        error.error || 'Credenciales incorrectas o fallo en el servidor.\n\nTip: Usa admin/admin123 si estás probando.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!fontsLoaded) {
     return null;
@@ -137,11 +169,11 @@ export default function LoginScreen({ navigation }) {
                     <Ionicons name="checkmark" size={14} color={COLORS.white} />
                   )}
                 </View>
-                <Text style={styles.rememberText}>Remeber me</Text>
+                <Text style={styles.rememberText}>Recordarme</Text>
               </TouchableOpacity>
 
               <TouchableOpacity>
-                <Text style={styles.forgotText}>Forgot password?</Text>
+                <Text style={styles.forgotText}>¿Olvidaste contraseña?</Text>
               </TouchableOpacity>
             </View>
 
@@ -154,14 +186,14 @@ export default function LoginScreen({ navigation }) {
               {loading ? (
                 <ActivityIndicator color={COLORS.white} />
               ) : (
-                <Text style={styles.loginButtonText}>Login</Text>
+                <Text style={styles.loginButtonText}>Ingresar</Text>
               )}
             </TouchableOpacity>
           </View>
 
           {/* Register Link */}
           <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>No tienes una cuenta? </Text>
+            <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text style={styles.registerLink}>Regístrate ahora</Text>
             </TouchableOpacity>
@@ -225,27 +257,27 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Manrope_600SemiBold',
     fontSize: 14,
-    color: COLORS.textGray,
+    color: COLORS.textGray || '#666',
     marginBottom: 8,
   },
   input: {
     fontFamily: 'Manrope_400Regular',
     fontSize: 15,
     color: COLORS.black,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.lightGray || '#F5F5F5',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.border || '#E0E0E0',
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.lightGray || '#F5F5F5',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.border || '#E0E0E0',
   },
   passwordInput: {
     flex: 1,
@@ -273,7 +305,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: COLORS.gray,
+    borderColor: COLORS.gray || '#999',
     marginRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
@@ -285,7 +317,7 @@ const styles = StyleSheet.create({
   rememberText: {
     fontFamily: 'Manrope_400Regular',
     fontSize: 14,
-    color: COLORS.textGray,
+    color: COLORS.textGray || '#666',
   },
   forgotText: {
     fontFamily: 'Manrope_600SemiBold',
@@ -304,7 +336,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   loginButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   loginButtonText: {
     fontFamily: 'Manrope_700Bold',
@@ -319,7 +351,7 @@ const styles = StyleSheet.create({
   registerText: {
     fontFamily: 'Manrope_400Regular',
     fontSize: 14,
-    color: COLORS.textGray,
+    color: COLORS.textGray || '#666',
   },
   registerLink: {
     fontFamily: 'Manrope_600SemiBold',

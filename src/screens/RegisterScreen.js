@@ -16,75 +16,85 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
+// Importamos los servicios para que el registro funcione de verdad
 import { authAPI } from '../services/api';
 import { saveUserData } from '../services/storage';
 
 export default function RegisterScreen({ navigation }) {
+  // 1. Estados del Formulario
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+  const [birthDate, setBirthDate] = useState(''); // Campo opcional pero útil en salud
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  
+  // 2. Estado de UI
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async () => {
-    // Validaciones
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Por favor completa todos los campos obligatorios');
-      return;
-    }
-
-    if (!acceptTerms) {
-      Alert.alert('Error', 'Debes aceptar los términos y políticas de privacidad');
-      return;
-    }
-
-    if (password.length < 8) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 8 caracteres');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const userData = {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password,
-        birthDate: birthDate || null,
-      };
-
-      const response = await authAPI.register(userData);
-      
-      // Guardar datos del usuario
-      await saveUserData(response.user);
-      
-      // Usuario nuevo - mostrar onboarding
-      Alert.alert(
-        '¡Registro Exitoso!',
-        `Bienvenido ${response.user.name}`,
-        [
-          {
-            text: 'Continuar',
-            onPress: () => navigation.replace('Onboarding'),
-          },
-        ]
-      );
-    } catch (error) {
-      Alert.alert(
-        'Error en el Registro',
-        error.error || 'No se pudo completar el registro. Intenta de nuevo.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 3. Carga de Fuentes
   let [fontsLoaded] = useFonts({
     Manrope_400Regular,
     Manrope_600SemiBold,
     Manrope_700Bold,
   });
+
+  // 4. Lógica de Registro
+  const handleRegister = async () => {
+    // Validaciones Locales
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Campos Incompletos', 'Por favor completa nombre, email y contraseña.');
+      return;
+    }
+
+    if (!acceptTerms) {
+      Alert.alert('Términos requeridos', 'Debes aceptar los términos y políticas de privacidad para continuar.');
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert('Seguridad', 'La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Preparar datos para el Backend
+      const userData = {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        birthDate: birthDate || null, // Enviamos null si está vacío
+      };
+
+      // Llamada a la API
+      const response = await authAPI.register(userData);
+      
+      // Si el registro es exitoso, guardamos sesión automáticamente
+      await saveUserData(response.user);
+      
+      // Feedback y Navegación
+      Alert.alert(
+        '¡Bienvenido a AI7!',
+        `Hola ${response.user.name}, tu cuenta ha sido creada con éxito.`,
+        [
+          {
+            text: 'Comenzar',
+            onPress: () => navigation.replace('Onboarding'), // Vamos al tutorial inicial
+          },
+        ]
+      );
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        'Error en el Registro',
+        error.error || 'No se pudo crear la cuenta. Verifica que el correo no esté ya registrado.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!fontsLoaded) {
     return null;
@@ -102,7 +112,7 @@ export default function RegisterScreen({ navigation }) {
         >
           <Ionicons name="chevron-back" size={24} color={COLORS.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Registro</Text>
+        <Text style={styles.headerTitle}>Crear Cuenta</Text>
         <View style={styles.backButton} />
       </View>
 
@@ -114,11 +124,12 @@ export default function RegisterScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Card */}
+          {/* Tarjeta del Formulario */}
           <View style={styles.card}>
-            {/* Name Input */}
+            
+            {/* Input: Nombre */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Nombre</Text>
+              <Text style={styles.label}>Nombre Completo</Text>
               <TextInput
                 style={styles.input}
                 placeholder="¿Cómo te llamamos?"
@@ -129,9 +140,9 @@ export default function RegisterScreen({ navigation }) {
               />
             </View>
 
-            {/* Email Input */}
+            {/* Input: Email */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Correo Electrónico</Text>
               <TextInput
                 style={styles.input}
                 placeholder="tu@email.com"
@@ -143,9 +154,9 @@ export default function RegisterScreen({ navigation }) {
               />
             </View>
 
-            {/* Password Input */}
+            {/* Input: Password */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>Contraseña</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
@@ -168,12 +179,12 @@ export default function RegisterScreen({ navigation }) {
               </View>
             </View>
 
-            {/* Birth Date Input */}
+            {/* Input: Fecha Nacimiento (Opcional) */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Fecha de Nacimiento (Opcional)</Text>
               <TextInput
                 style={styles.input}
-                placeholder="AAAA-MM-DD (ej: 1990-01-15)"
+                placeholder="AAAA-MM-DD (ej: 1995-05-20)"
                 placeholderTextColor={COLORS.gray}
                 value={birthDate}
                 onChangeText={setBirthDate}
@@ -181,7 +192,7 @@ export default function RegisterScreen({ navigation }) {
               />
             </View>
 
-            {/* Terms Checkbox */}
+            {/* Checkbox: Términos */}
             <TouchableOpacity 
               style={styles.termsContainer}
               onPress={() => setAcceptTerms(!acceptTerms)}
@@ -191,10 +202,12 @@ export default function RegisterScreen({ navigation }) {
                   <Ionicons name="checkmark" size={14} color={COLORS.white} />
                 )}
               </View>
-              <Text style={styles.termsText}>Acepto términos y políticas de privacidad</Text>
+              <Text style={styles.termsText}>
+                Acepto los términos de servicio y políticas de privacidad de AI7.
+              </Text>
             </TouchableOpacity>
 
-            {/* Register Button */}
+            {/* Botón de Registro */}
             <TouchableOpacity 
               style={[styles.registerButton, loading && styles.registerButtonDisabled]}
               onPress={handleRegister}
@@ -203,18 +216,20 @@ export default function RegisterScreen({ navigation }) {
               {loading ? (
                 <ActivityIndicator color={COLORS.white} />
               ) : (
-                <Text style={styles.registerButtonText}>Confirmar</Text>
+                <Text style={styles.registerButtonText}>Crear Cuenta</Text>
               )}
             </TouchableOpacity>
           </View>
 
-          {/* Login Link */}
+          {/* Enlace al Login */}
           <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Ya tienes una cuenta? </Text>
+            <Text style={styles.loginText}>¿Ya tienes una cuenta? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.loginLink}>Ir al Login</Text>
+              <Text style={styles.loginLink}>Inicia Sesión</Text>
             </TouchableOpacity>
           </View>
+          
+          <View style={{height: 50}} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -274,27 +289,27 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Manrope_600SemiBold',
     fontSize: 14,
-    color: COLORS.textGray,
+    color: COLORS.textGray || '#666',
     marginBottom: 8,
   },
   input: {
     fontFamily: 'Manrope_400Regular',
     fontSize: 15,
     color: COLORS.black,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.lightGray || '#F5F5F5',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.border || '#E0E0E0',
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.lightGray || '#F5F5F5',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.border || '#E0E0E0',
   },
   passwordInput: {
     flex: 1,
@@ -309,7 +324,7 @@ const styles = StyleSheet.create({
   },
   termsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start', // Alineado arriba por si el texto es largo
     marginBottom: 24,
   },
   checkbox: {
@@ -317,10 +332,11 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: COLORS.gray,
-    marginRight: 8,
+    borderColor: COLORS.gray || '#999',
+    marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 2, // Ajuste visual fino
   },
   checkboxChecked: {
     backgroundColor: COLORS.primary,
@@ -330,7 +346,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'Manrope_400Regular',
     fontSize: 13,
-    color: COLORS.textGray,
+    color: COLORS.textGray || '#666',
+    lineHeight: 20,
   },
   registerButton: {
     backgroundColor: COLORS.primary,
@@ -344,7 +361,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   registerButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   registerButtonText: {
     fontFamily: 'Manrope_700Bold',
@@ -359,7 +376,7 @@ const styles = StyleSheet.create({
   loginText: {
     fontFamily: 'Manrope_400Regular',
     fontSize: 14,
-    color: COLORS.textGray,
+    color: COLORS.textGray || '#666',
   },
   loginLink: {
     fontFamily: 'Manrope_600SemiBold',

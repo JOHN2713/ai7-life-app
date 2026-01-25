@@ -8,8 +8,7 @@ import {
   FlatList, 
   KeyboardAvoidingView, 
   Platform,
-  ActivityIndicator,
-  StatusBar
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,12 +18,16 @@ import { API_URL } from '../services/apiConfig';
 import { getUserData } from '../services/storage';
 
 export default function ChatScreenList({ route, navigation }) {
+  // 1. Recibimos los datos del amigo seleccionado
   const { recipient } = route.params; 
+  
+  // 2. Estados para la lógica de red y usuario
   const [myUserId, setMyUserId] = useState(null);
   const [message, setMessage] = useState('');
   const [chatMessages, setChatMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 3. Efecto inicial: Cargar mi ID y luego el historial
   useEffect(() => {
     const initChat = async () => {
       try {
@@ -42,6 +45,7 @@ export default function ChatScreenList({ route, navigation }) {
     initChat();
   }, []);
 
+  // 4. Función para traer mensajes reales de PostgreSQL
   const fetchHistory = async (myId, friendId) => {
     try {
       const response = await axios.get(`${API_URL}/user-chat/historial/${myId}/${friendId}`);
@@ -51,6 +55,7 @@ export default function ChatScreenList({ route, navigation }) {
     }
   };
 
+  // 5. Función para enviar mensaje y guardarlo en la DB
   const sendMessage = async () => {
     if (message.trim().length === 0) return;
     
@@ -61,20 +66,36 @@ export default function ChatScreenList({ route, navigation }) {
     };
 
     try {
+      // Enviamos al nuevo endpoint de chat entre usuarios
       const response = await axios.post(`${API_URL}/user-chat/enviar`, messageData);
+      
+      // Añadimos el mensaje retornado por la DB a la lista local
       setChatMessages([...chatMessages, response.data]);
       setMessage('');
     } catch (error) {
       console.error("Error al enviar mensaje:", error);
+      alert("No se pudo enviar el mensaje a la base de datos.");
     }
   };
 
+  // 6. Renderizado de cada burbuja de mensaje
   const renderItem = ({ item }) => {
+    // Verificamos si el emisor soy yo usando el UUID
     const isMine = item.emisor_id === myUserId;
+
     return (
-      <View style={[styles.messageWrapper, isMine ? styles.myWrapper : styles.otherWrapper]}>
-        <View style={[styles.messageBubble, isMine ? styles.myBubble : styles.otherBubble]}>
-          <Text style={[styles.messageText, isMine ? styles.myText : styles.otherText]}>
+      <View style={[
+        styles.messageWrapper, 
+        isMine ? styles.myWrapper : styles.otherWrapper
+      ]}>
+        <View style={[
+          styles.messageBubble, 
+          isMine ? styles.myBubble : styles.otherBubble
+        ]}>
+          <Text style={[
+            styles.messageText, 
+            isMine ? styles.myText : styles.otherText
+          ]}>
             {item.contenido}
           </Text>
         </View>
@@ -84,9 +105,7 @@ export default function ChatScreenList({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-      
-      {/* 1. Header Fijo */}
+      {/* Header Personalizado */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={28} color={COLORS.black} />
@@ -106,47 +125,47 @@ export default function ChatScreenList({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* 2. Contenedor que evita el teclado */}
-      <KeyboardAvoidingView 
-        style={styles.contentContainer}
-        behavior={Platform.OS === 'android' ? 'height' : 'padding'}
-        keyboardVerticalOffset={Platform.OS === 'android' ? 25 : 0}
-      >
-        {loading ? (
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-          </View>
-        ) : (
-          <FlatList
-            data={chatMessages}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
+      {/* Lista de Mensajes o Indicador de Carga */}
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={chatMessages}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          // Iniciar la lista desde abajo si es necesario (opcional)
+          // inverted={false} 
+        />
+      )}
 
-        {/* 3. Área de entrada de texto */}
+      {/* Input de Mensaje */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
         <View style={styles.inputArea}>
           <TouchableOpacity style={styles.attachBtn}>
-            <Ionicons name="add" size={26} color={COLORS.gray} />
+            <Ionicons name="add" size={24} color={COLORS.gray} />
           </TouchableOpacity>
           
           <TextInput
             style={styles.textInput}
             placeholder="Escribe un mensaje..."
-            placeholderTextColor={COLORS.gray}
             value={message}
             onChangeText={setMessage}
             multiline
           />
           
           <TouchableOpacity 
-            style={[styles.sendBtn, !message.trim() && { opacity: 0.6 }]} 
+            style={[styles.sendBtn, !message.trim() && { opacity: 0.5 }]} 
             onPress={sendMessage}
             disabled={!message.trim()}
           >
-            <Ionicons name="send" size={18} color={COLORS.white} />
+            <Ionicons name="send" size={20} color={COLORS.white} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -155,21 +174,13 @@ export default function ChatScreenList({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FFF' 
-  },
+  container: { flex: 1, backgroundColor: '#FFF' },
   header: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    padding: 15, 
     borderBottomWidth: 1, 
-    borderBottomColor: '#F0F0F0',
-    backgroundColor: '#FFF',
-  },
-  contentContainer: {
-    flex: 1,
+    borderBottomColor: '#F0F0F0' 
   },
   backBtn: { marginRight: 10 },
   avatarMini: { 
@@ -180,62 +191,52 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     justifyContent: 'center' 
   },
-  avatarText: { color: COLORS.primary, fontWeight: 'bold', fontSize: 16 },
+  avatarText: { color: COLORS.primary, fontWeight: 'bold' },
   headerInfo: { flex: 1, marginLeft: 12 },
   headerName: { fontFamily: 'Manrope_700Bold', fontSize: 16, color: COLORS.black },
-  headerStatus: { fontSize: 12, color: '#10B981', fontFamily: 'Manrope_400Regular' },
-  callBtn: { padding: 5 },
-  listContent: { 
-    paddingHorizontal: 20, 
-    paddingVertical: 15,
-    paddingBottom: 20 
-  },
+  headerStatus: { fontSize: 12, color: '#10B981' },
+  listContent: { padding: 20, paddingBottom: 10 },
   messageWrapper: { marginBottom: 15, width: '100%' },
   myWrapper: { alignItems: 'flex-end' },
   otherWrapper: { alignItems: 'flex-start' },
   messageBubble: { 
     maxWidth: '80%', 
     padding: 12, 
-    borderRadius: 18,
+    borderRadius: 20,
   },
   myBubble: { 
     backgroundColor: COLORS.primary, 
-    borderBottomRightRadius: 2 
+    borderBottomRightRadius: 4 
   },
   otherBubble: { 
-    backgroundColor: '#F3F3F3', 
-    borderBottomLeftRadius: 2 
+    backgroundColor: '#F0F0F0', 
+    borderBottomLeftRadius: 4 
   },
-  myText: { color: '#FFF', fontFamily: 'Manrope_400Regular', fontSize: 15 },
-  otherText: { color: '#333', fontFamily: 'Manrope_400Regular', fontSize: 15 },
+  myText: { color: '#FFF', fontFamily: 'Manrope_400Regular' },
+  otherText: { color: COLORS.black, fontFamily: 'Manrope_400Regular' },
   inputArea: { 
     flexDirection: 'row', 
     padding: 12, 
     alignItems: 'center', 
     backgroundColor: '#FFF',
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: '#F0F0F0'
   },
-  attachBtn: { marginRight: 5 },
   textInput: { 
     flex: 1, 
     backgroundColor: '#F5F5F5', 
-    borderRadius: 25, 
-    paddingHorizontal: 18, 
+    borderRadius: 20, 
+    paddingHorizontal: 15, 
     paddingVertical: 8, 
-    marginHorizontal: 8,
-    maxHeight: 100,
-    fontFamily: 'Manrope_400Regular',
-    fontSize: 15,
-    color: '#000'
+    marginHorizontal: 10,
+    maxHeight: 100 
   },
   sendBtn: { 
     backgroundColor: COLORS.primary, 
-    width: 42, 
-    height: 42, 
-    borderRadius: 21, 
+    width: 40, 
+    height: 40, 
+    borderRadius: 20, 
     alignItems: 'center', 
-    justifyContent: 'center',
-    elevation: 2
+    justifyContent: 'center' 
   }
 });

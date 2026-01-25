@@ -24,6 +24,7 @@ export default function GoalsScreen({ navigation }) {
   const handleCreateGoal = () => {
     // Navegar a la pantalla de crear meta
     console.log('Crear meta');
+    // TODO: Implementar navegación a CrearGoalScreen cuando exista
   };
 
   return (
@@ -33,7 +34,10 @@ export default function GoalsScreen({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Una meta a la vez</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={handleCreateGoal}
+        >
           <Ionicons name="add" size={24} color={COLORS.white} />
         </TouchableOpacity>
       </View>

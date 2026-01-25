@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { COLORS } from '../constants/colors';
+// Importamos la función para guardar que el tutorial fue visto
 import { setOnboardingCompleted } from '../services/storage';
 
 const { width, height } = Dimensions.get('window');
@@ -31,13 +32,13 @@ const slides = [
   {
     id: '3',
     image: require('../../assets/images/img_onboarding3.png'),
-    title: 'Autoanalisis',
+    title: 'Autoanálisis',
     description: 'Antes de empezar vamos a ver cómo nos encontramos HOY',
   },
 ];
 
 export default function OnboardingScreen({ navigation }) {
-  // Todos los hooks al inicio, antes de cualquier return
+  // 1. Hooks de Estado y Fuentes
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fontsLoaded] = useFonts({
     Manrope_400Regular,
@@ -45,24 +46,28 @@ export default function OnboardingScreen({ navigation }) {
     Manrope_700Bold,
   });
   
+  // 2. Referencias de Animación
   const scrollX = useRef(new Animated.Value(0)).current;
   const slidesRef = useRef(null);
   
-  // Animaciones para cada slide
-  const scale1 = useRef(new Animated.Value(0)).current;
-  const rotate2 = useRef(new Animated.Value(0)).current;
-  const translateX3 = useRef(new Animated.Value(100)).current;
-  const opacity3 = useRef(new Animated.Value(0)).current;
+  // Animaciones individuales para cada slide
+  const scale1 = useRef(new Animated.Value(0)).current;      // Slide 1: Zoom
+  const rotate2 = useRef(new Animated.Value(0)).current;     // Slide 2: Rotación
+  const translateX3 = useRef(new Animated.Value(100)).current; // Slide 3: Desplazamiento
+  const opacity3 = useRef(new Animated.Value(0)).current;    // Slide 3: Opacidad
   
+  // 3. Configuración de Vista (Detectar qué slide está visible)
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
+  
   const viewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
       const index = viewableItems[0].index;
       setCurrentIndex(index);
       
-      // Animaciones específicas según el slide
+      // Lógica de Animaciones según el slide actual
       if (index === 0) {
-        // Primera pantalla: Zoom in
+        // Primera pantalla: Zoom in suave
+        scale1.setValue(0.5); // Reseteamos un poco para que se note el efecto
         Animated.spring(scale1, {
           toValue: 1,
           tension: 20,
@@ -78,7 +83,7 @@ export default function OnboardingScreen({ navigation }) {
           useNativeDriver: true,
         }).start();
       } else if (index === 2) {
-        // Tercera pantalla: Fade from right
+        // Tercera pantalla: Aparece desde la derecha
         translateX3.setValue(100);
         opacity3.setValue(0);
         Animated.parallel([
@@ -97,59 +102,52 @@ export default function OnboardingScreen({ navigation }) {
     }
   }).current;
 
-  // Return condicional después de todos los hooks
+  // 4. Check de fuentes antes de renderizar
   if (!fontsLoaded) {
     return null;
   }
 
-  const scrollTo = () => {
+  // 5. Manejo de Botón "Siguiente" / "Comenzar"
+  const handleNext = async () => {
     if (currentIndex < slides.length - 1) {
+      // Si no es el último, deslizamos al siguiente
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      // Última pantalla - marcar onboarding como completado y navegar a Main
-      handleComplete();
+      // Si es el último, guardamos y salimos
+      try {
+        await setOnboardingCompleted(); 
+      } catch (error) {
+        console.error("Error guardando onboarding:", error);
+      } finally {
+        // Navegamos a Main (o Login si prefieres) independientemente del error
+        navigation.replace('Main');
+      }
     }
   };
 
-  const handleComplete = async () => {
-    await setOnboardingCompleted();
-    navigation.replace('Main');
-  };
-
+  // 6. Renderizado de cada Item (Slide)
   const renderItem = ({ item, index }) => {
     let animationStyle = {};
     
-    // Aplicar animación específica según el índice
+    // Asignar estilo animado según el índice
     if (index === 0) {
-      // Primera pantalla: Zoom in
-      animationStyle = {
-        transform: [{ scale: scale1 }],
-      };
+      animationStyle = { transform: [{ scale: scale1 }] };
     } else if (index === 1) {
-      // Segunda pantalla: Giro 360°
       const rotation = rotate2.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg'],
       });
-      animationStyle = {
-        transform: [{ rotate: rotation }],
-      };
+      animationStyle = { transform: [{ rotate: rotation }] };
     } else if (index === 2) {
-      // Tercera pantalla: Fade from right
-      animationStyle = {
+      animationStyle = { 
         opacity: opacity3,
-        transform: [{ translateX: translateX3 }],
+        transform: [{ translateX: translateX3 }] 
       };
     }
     
     return (
       <View style={styles.slide}>
-        <Animated.View
-          style={[
-            styles.imageContainer,
-            animationStyle,
-          ]}
-        >
+        <Animated.View style={[styles.imageContainer, animationStyle]}>
           <Image source={item.image} style={styles.image} resizeMode="contain" />
         </Animated.View>
 
@@ -161,6 +159,7 @@ export default function OnboardingScreen({ navigation }) {
     );
   };
 
+  // 7. Renderizado Principal
   return (
     <View style={styles.container}>
       <FlatList
@@ -171,9 +170,10 @@ export default function OnboardingScreen({ navigation }) {
         pagingEnabled
         bounces={false}
         keyExtractor={(item) => item.id}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
-          useNativeDriver: false,
-        })}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false }
+        )}
         scrollEventThrottle={32}
         onViewableItemsChanged={viewableItemsChanged}
         viewabilityConfig={viewConfig}
@@ -181,7 +181,7 @@ export default function OnboardingScreen({ navigation }) {
       />
 
       <View style={styles.footer}>
-        {/* Pagination Dots */}
+        {/* Puntos de Paginación */}
         <View style={styles.pagination}>
           {slides.map((_, index) => {
             const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
@@ -203,19 +203,16 @@ export default function OnboardingScreen({ navigation }) {
                 key={index}
                 style={[
                   styles.dot,
-                  {
-                    width: dotWidth,
-                    opacity,
-                  },
+                  { width: dotWidth, opacity },
                 ]}
               />
             );
           })}
         </View>
 
-        {/* Button */}
+        {/* Botón de Acción (Solo aparece en el último slide para forzar lectura, o cambiar lógica si deseas) */}
         {currentIndex === slides.length - 1 && (
-          <TouchableOpacity style={styles.button} onPress={scrollTo}>
+          <TouchableOpacity style={styles.button} onPress={handleNext}>
             <Text style={styles.buttonText}>Comenzar</Text>
           </TouchableOpacity>
         )}
@@ -243,41 +240,45 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   image: {
-    width: width * 0.6,
+    width: width * 0.7, // Ajustado ligeramente para mejor proporción
     height: height * 0.4,
-    maxWidth: 300,
-    maxHeight: 300,
+    maxWidth: 320,
+    maxHeight: 320,
   },
   textContainer: {
     flex: 0.4,
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 30,
+    justifyContent: 'flex-start',
+    paddingTop: 20,
   },
   title: {
     fontFamily: 'Manrope_700Bold',
-    fontSize: 24,
+    fontSize: 26,
     color: COLORS.black,
     textAlign: 'center',
     marginBottom: 16,
-    lineHeight: 32,
+    lineHeight: 34,
   },
   description: {
     fontFamily: 'Manrope_400Regular',
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.gray,
     textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 20,
+    lineHeight: 24,
   },
   footer: {
-    paddingBottom: 40,
+    paddingBottom: 50, // Más espacio abajo para dispositivos modernos
     paddingHorizontal: 20,
+    height: 150, // Altura fija para evitar saltos
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   pagination: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    height: 40,
   },
   dot: {
     height: 8,
@@ -287,18 +288,20 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 16,
+    paddingVertical: 18,
+    width: '80%', // Botón ancho es más fácil de pulsar
     alignItems: 'center',
     shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 }, // Sombra más moderna
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
   },
   buttonText: {
     fontFamily: 'Manrope_700Bold',
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.white,
+    letterSpacing: 0.5,
   },
 });
