@@ -1,5 +1,4 @@
-// src/screens/ActivityLevelScreen.js - VERSIÓN CORREGIDA
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,8 +7,13 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
+  ActivityIndicator, Alert
 } from 'react-native';
 import { COLORS } from '../constants/colors';
+import axios from 'axios'; 
+import { API_URL } from '../services/apiConfig'; // Asegúrate de tener este archivo
+import { getUserData } from '../services/storage'; // Para sacar el email
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Para guardar localmente
 
 const ActivityLevelScreen = ({ navigation, route }) => {
   // Datos recibidos de pantallas anteriores
@@ -44,25 +48,80 @@ const ActivityLevelScreen = ({ navigation, route }) => {
     }
   ];
 
-  const handleContinue = () => {
+  // Estado de carga (agrégalo junto a tus otros useState)
+  const [loading, setLoading] = useState(false);
+
+  const handleContinue = async () => {
     if (!selectedActivity) {
-      alert('Por favor selecciona tu nivel de actividad');
+      Alert.alert('Falta información', 'Por favor selecciona tu nivel de actividad');
       return;
     }
 
-    // Preparar TODOS los datos para resultados
-    const healthData = {
-      age,
-      height_cm: height,
-      weight_kg: weight,
-      bmi: parseFloat(bmi),
-      sleep_hours: sleepHours,
-      water_glasses: waterGlasses,
-      activity_level: selectedActivity,
-    };
+    setLoading(true);
 
-    // Navegar a resultados finales
-    navigation.navigate('HealthResults', healthData);
+    try {
+      // 1. Obtener email
+      const userData = await getUserData();
+      
+      if (!userData || !userData.email) {
+        Alert.alert("Error", "No se encontró sesión. Inicia sesión de nuevo.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Preparar datos
+      const healthData = {
+        email: userData.email,
+        age: parseInt(age),
+        height_cm: parseFloat(height),
+        weight_kg: parseFloat(weight),
+        bmi: parseFloat(bmi),
+        sleep_hours: parseFloat(sleepHours),
+        water_glasses: parseInt(waterGlasses),
+        activity_level: selectedActivity,
+      };
+
+      // 3. Enviar al Backend
+      const response = await axios.post(`${API_URL}/health/submit`, healthData);
+
+      if (response.data.success) {
+        
+        // 4. Guardar en Local (para el botón del Home)
+        const finalResults = { ...healthData, ...response.data.data };
+        await AsyncStorage.setItem('last_check_results', JSON.stringify(finalResults));
+
+        // --- AQUÍ ESTÁ EL CAMBIO ---
+        // 5. Mostrar mensaje de éxito y luego navegar
+        setLoading(false); // Quitamos el spinner antes de la alerta
+        
+        Alert.alert(
+          "¡Excelente Trabajo!",                 // Título
+          "Tu información ha sido guardada correctamente.", // Mensaje
+          [
+            { 
+              text: "Ver Resultados", 
+              onPress: () => {
+                // Al presionar OK, vamos al Home
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Main' }],
+                });
+              } 
+            }
+          ],
+          { cancelable: false } // Evita cerrar la alerta tocando afuera
+        );
+
+      } else {
+        Alert.alert("Atención", "No se pudieron guardar los datos.");
+        setLoading(false);
+      }
+
+    } catch (error) {
+      console.error("Error:", error);
+      Alert.alert("Error de Conexión", "Revisa tu internet e inténtalo de nuevo.");
+      setLoading(false);
+    }
   };
 
   const ActivityCard = ({ level, isSelected, onPress }) => (
@@ -71,7 +130,7 @@ const ActivityLevelScreen = ({ navigation, route }) => {
         styles.activityCard,
         isSelected && styles.activityCardSelected
       ]}
-      onPress={() => onPress(level.id)}
+      onPress={() => onPress(level.title)} // Guardamos el Title ('Moderado') para que coincida con tu DB enum si aplica
       activeOpacity={0.7}
     >
       <View style={styles.activityIconContainer}>
@@ -109,7 +168,7 @@ const ActivityLevelScreen = ({ navigation, route }) => {
           <Text style={styles.backButton}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Check General</Text>
-        <Text style={styles.headerTime}>9:41</Text>
+        <View style={{width: 20}} /> 
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -131,7 +190,7 @@ const ActivityLevelScreen = ({ navigation, route }) => {
               <ActivityCard
                 key={level.id}
                 level={level}
-                isSelected={selectedActivity === level.id}
+                isSelected={selectedActivity === level.title} // Comparamos con title
                 onPress={setSelectedActivity}
               />
             ))}
@@ -145,6 +204,7 @@ const ActivityLevelScreen = ({ navigation, route }) => {
           <TouchableOpacity 
             style={styles.backButtonFooter}
             onPress={() => navigation.goBack()}
+            disabled={loading}
           >
             <Text style={styles.backButtonText}>Atrás</Text>
           </TouchableOpacity>
@@ -152,13 +212,17 @@ const ActivityLevelScreen = ({ navigation, route }) => {
           <TouchableOpacity 
             style={[
               styles.continueButton,
-              !selectedActivity && styles.continueButtonDisabled
+              (!selectedActivity || loading) && styles.continueButtonDisabled
             ]}
             onPress={handleContinue}
-            disabled={!selectedActivity}
+            disabled={!selectedActivity || loading}
             activeOpacity={0.8}
           >
-            <Text style={styles.continueButtonText}>Continuar</Text>
+            {loading ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <Text style={styles.continueButtonText}>Finalizar</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -188,10 +252,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.black,
-  },
-  headerTime: {
-    fontSize: 14,
-    color: COLORS.textGray,
   },
   scrollContent: {
     flexGrow: 1,
