@@ -63,12 +63,38 @@ export default function GoalsScreen({ navigation }) {
     setRefreshing(false);
   };
 
-  const handleCompleteGoal = async (goalId) => {
+  /* const handleCompleteGoal = async (goalId) => {
     try {
       await goalsAPI.completeGoal(goalId);
       loadGoals(); // Recargar metas
     } catch (error) {
       Alert.alert('Error', 'No se pudo marcar la meta como completada');
+    }
+  }; */
+
+    const handleCompleteGoal = async (goal) => {
+    // Verificar si es meta de caminar
+    const isWalkingGoal = 
+      goal.type === 'walking' ||
+      goal.category === 'exercise' ||
+      goal.icon === 'walk' ||
+      goal.name.toLowerCase().includes('caminar') ||
+      goal.name.toLowerCase().includes('pasos');
+    
+    if (isWalkingGoal) {
+      // Navegar a pantalla de tracking
+      navigation.navigate('WalkTracking', { 
+        goalId: goal.id,
+        goalName: goal.name 
+      });
+    } else {
+      // Completar normalmente
+      try {
+        await goalsAPI.completeGoal(goal.id);
+        loadGoals();
+      } catch (error) {
+        Alert.alert('Error', 'No se pudo marcar la meta como completada');
+      }
     }
   };
 
@@ -170,12 +196,20 @@ export default function GoalsScreen({ navigation }) {
                   </Text>
                 </View>
 
-                {/* Botón de completar hoy */}
+                {/* Botón de completar hoy 
                 <TouchableOpacity
                   style={[styles.completeButton, { backgroundColor: goal.color }]}
                   onPress={(e) => {
                     e.stopPropagation();
                     handleCompleteGoal(goal.id);
+                  }}
+                >
+                */}
+                <TouchableOpacity
+                  style={[styles.completeButton, { backgroundColor: goal.color }]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleCompleteGoal(goal); // Pasar el objeto goal completo
                   }}
                 >
                   <Ionicons name="checkmark-circle" size={20} color={COLORS.white} />
