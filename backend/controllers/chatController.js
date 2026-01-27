@@ -12,19 +12,83 @@ const SYSTEM_PROMPT = `Eres un coach de salud y bienestar llamado "AI7 Coach". T
 4. Ser empático, motivador y positivo en tus respuestas
 5. Usar un lenguaje cercano y amigable en español
 
-IMPORTANTE:
-- Solo puedes hablar sobre: nutrición, salud, ejercicio, buenos hábitos, motivación y bienestar
-- Si te preguntan sobre otros temas (política, tecnología, programación, etc.), debes responder: "Soy AI7 Coach, un agente especializado en nutrición, buenos hábitos y motivación. ¿En qué puedo ayudarte con tu salud y bienestar?"
-- Mantén las respuestas concisas (máximo 200 palabras)
-- Usa emojis ocasionalmente para hacer las conversaciones más amigables
-- Siempre termina preguntando si pueden ayudar en algo más relacionado con salud
+REGLAS ESTRICTAS DE FORMATO - LEE ESTO CON ATENCIÓN:
+- NUNCA uses asteriscos (*) o dobles asteriscos (**) en ningún lugar
+- NUNCA uses símbolos de markdown como # _ ~ o \`
+- NO escribas palabras entre asteriscos como **palabra** o *palabra*
+- Para títulos o subtítulos, usa texto normal seguido de dos puntos (:)
+- Para enfatizar, usa MAYÚSCULAS COMPLETAS en palabras clave
+- Para listas numeradas escribe: 1. Texto, 2. Texto, 3. Texto
+- Para viñetas usa solo guión y espacio: - Texto
+- Escribe de forma conversacional y natural como si hablaras
+- COMPLETA SIEMPRE tus respuestas hasta el final
 
-Ejemplo de respuestas:
-Usuario: "¿Qué debo comer para desayunar?"
-Tú: "¡Excelente pregunta! 🌅 Un desayuno balanceado debería incluir: proteínas (huevos, yogurt griego), carbohidratos complejos (avena, pan integral) y frutas. Evita azúcares refinados. ¿Te gustaría que te dé un ejemplo de menú?"
+TEMAS PERMITIDOS:
+- Nutrición, salud, ejercicio, buenos hábitos, motivación y bienestar
+- Para otros temas: "Soy AI7 Coach, especializado en nutrición y bienestar. ¿En qué puedo ayudarte con tu salud?"
 
-Usuario: "¿Quién ganó las elecciones?"
-Tú: "Soy AI7 Coach, un agente especializado en nutrición, buenos hábitos y motivación. ¿En qué puedo ayudarte con tu salud y bienestar?"`;
+EJEMPLO CORRECTO de respuesta:
+Usuario: "¿Cómo empiezo a correr?"
+Tú: "Hola! Qué EXCELENTE iniciativa estás tomando! 🎉
+
+Para iniciar el hábito de correr, te sugiero comenzar gradualmente:
+
+FASE 1: Primeras semanas
+- Alterna caminar 2 minutos y trotar 1 minuto
+- Duración total: 20-30 minutos
+- Frecuencia: 3 veces por semana
+
+FASE 2: Siguientes semanas
+- Aumenta progresivamente el tiempo trotando
+- Reduce el tiempo caminando
+- Mantén la frecuencia
+
+CONSEJOS IMPORTANTES:
+- Usa calzado deportivo adecuado
+- Hidrátate antes y después
+- Escucha a tu cuerpo
+
+Estás listo para empezar esta gran aventura! 💪"
+
+EJEMPLO INCORRECTO (NO HAGAS ESTO):
+"**Fase 1:** Primeras semanas" ❌
+"*Consejos importantes:* Usa calzado" ❌
+
+Recuerda: Escribe TODO en texto plano sin símbolos especiales.`;
+
+// Función para limpiar markdown de las respuestas
+const cleanMarkdown = (text) => {
+  if (!text) return text;
+  
+  // Eliminar negritas (**texto** o __texto__)
+  text = text.replace(/\*\*(.+?)\*\*/g, '$1');
+  text = text.replace(/__(.+?)__/g, '$1');
+  
+  // Eliminar itálicas (*texto* o _texto_)
+  text = text.replace(/\*(.+?)\*/g, '$1');
+  text = text.replace(/_(.+?)_/g, '$1');
+  
+  // Eliminar código inline (`texto`)
+  text = text.replace(/`(.+?)`/g, '$1');
+  
+  // Eliminar encabezados markdown (### texto)
+  text = text.replace(/^#{1,6}\s+(.+)$/gm, '$1');
+  
+  return text;
+};
+
+// Respuestas predefinidas para cuando hay límite de cuota
+const FALLBACK_RESPONSES = [
+  "¡Hola! 😊 Estoy aquí para ayudarte con tus metas de salud y bienestar. ¿Qué te gustaría lograr hoy?",
+  "¡Excelente que estés aquí! 💪 Cuéntame, ¿en qué aspecto de tu salud te gustaría trabajar?",
+  "Me encantaría ayudarte con tus objetivos de bienestar. ¿Tienes alguna meta específica en mente?",
+  "Recuerda que cada pequeño paso cuenta. 🌟 ¿Hay algún hábito que quieras mejorar hoy?",
+  "¡Genial! Estoy aquí para apoyarte. ¿Necesitas consejos sobre nutrición, ejercicio o motivación?"
+];
+
+const getRandomFallbackResponse = () => {
+  return FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
+};
 
 // Enviar mensaje al chat
 const sendMessage = async (req, res) => {
@@ -50,7 +114,7 @@ const sendMessage = async (req, res) => {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 500,
+        maxOutputTokens: 1024, // Aumentado para evitar respuestas cortadas
       },
     });
 
@@ -69,7 +133,10 @@ const sendMessage = async (req, res) => {
     // Generar respuesta
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
-    const aiMessage = response.text();
+    let aiMessage = response.text();
+    
+    // Limpiar cualquier markdown que pueda quedar
+    aiMessage = cleanMarkdown(aiMessage);
 
     res.json({
       success: true,
@@ -88,15 +155,21 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    if (error.message?.includes('quota')) {
-      return res.status(429).json({ 
-        error: 'Límite de uso alcanzado',
-        message: 'Has alcanzado el límite de peticiones. Intenta más tarde.'
+    if (error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('Too Many Requests')) {
+      console.log('Límite de cuota alcanzado, usando respuesta predefinida');
+      // En lugar de devolver error, devolver respuesta predefinida
+      return res.json({
+        success: true,
+        message: getRandomFallbackResponse(),
+        timestamp: new Date().toISOString(),
+        fallback: true,
+        quotaExceeded: true
       });
     }
 
     res.status(500).json({ 
       error: 'Error al procesar el mensaje',
+      message: 'Hubo un problema al procesar tu mensaje. Por favor, intenta de nuevo.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
