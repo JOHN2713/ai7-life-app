@@ -428,3 +428,71 @@ export const friendsAPI = {
 
 export default api;
 
+// ========================================
+// API DE ACTIVIDADES (WALKING)
+// ========================================
+export const activitiesAPI = {
+  // Guardar una actividad de caminata
+  saveWalkActivity: async (activityData) => {
+    try {
+      const response = await api.post('/activities/walk', activityData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Obtener historial de actividades
+  getActivitiesHistory: async (limit = 20, offset = 0) => {
+    try {
+      const response = await api.get('/activities/history', {
+        params: { limit, offset }
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Obtener estadísticas de actividades
+  getActivitiesStats: async () => {
+    try {
+      const response = await api.get('/activities/stats');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Obtener actividad por ID
+  getActivityById: async (activityId) => {
+    try {
+      const response = await api.get(`/activities/${activityId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Eliminar actividad
+  deleteActivity: async (activityId) => {
+    try {
+      const response = await api.delete(`/activities/${activityId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Obtener actividades por meta específica
+  getActivitiesByGoal: async (goalId) => {
+    try {
+      const response = await api.get('/activities', {
+        params: { goal_id: goalId }
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+};
