@@ -1,18 +1,19 @@
-// src/components/navigation/HealthFlowNavigator.js
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AgeScreen from '../screens/AgeScreen';
+
+// --- IMPORTA TUS PANTALLAS REALES ---
+import AgeScreen from '../screens/AgeScreen'; // <--- CORREGIDO: Usamos AgeScreen
 import BodyMetricsScreen from '../screens/BodyMetricsScreen';
 import SleepWaterScreen from '../screens/SleepWaterScreen';
 import ActivityLevelScreen from '../screens/ActivityLevelScreen';
-import HealthResultsScreen from '../screens/HealthResultsScreen';
+import HealthResults from '../screens/HealthResults';
 
 const Stack = createNativeStackNavigator();
 
 const HealthFlowNavigator = () => {
   return (
     <Stack.Navigator 
-      initialRouteName="AgeScreen"
+      initialRouteName="AgeScreen" // <--- Empezamos aquí
       screenOptions={{
         headerShown: false,
         gestureEnabled: true,
@@ -37,7 +38,7 @@ const HealthFlowNavigator = () => {
       />
       <Stack.Screen 
         name="HealthResults" 
-        component={HealthResultsScreen}
+        component={HealthResults}
       />
     </Stack.Navigator>
   );
