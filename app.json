@@ -28,7 +28,10 @@
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "SCHEDULE_EXACT_ALARM",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
       ],
       "useNextNotificationsApi": true
     },
@@ -41,10 +44,16 @@
           "sounds": ["./assets/notification-sound.wav"],
           "mode": "production"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permitir a $(PRODUCT_NAME) usar tu ubicación en todo momento para rastrear tus caminatas.",
+          "isAndroidBackgroundLocationEnabled": true
+        }
       ]
     ],
     "web": {
       "favicon": "./assets/favicon.png"
     }
-  }
-}
+  }}
