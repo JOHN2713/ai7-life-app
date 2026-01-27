@@ -60,70 +60,89 @@ const ActivityLevelScreen = ({ navigation, route }) => {
     setLoading(true);
 
     try {
-      // 1. Obtener email
+      // 1. Obtener datos del usuario
       const userData = await getUserData();
       
+      // Validación estricta del email
       if (!userData || !userData.email) {
-        Alert.alert("Error", "No se encontró sesión. Inicia sesión de nuevo.");
+        Alert.alert("Error de Sesión", "No se encontró el email del usuario. Intenta cerrar sesión e ingresar de nuevo.");
         setLoading(false);
         return;
       }
 
-      // 2. Preparar datos
+      // 2. Preparar el objeto para enviar
+      // Usamos || 0 o || '' para evitar que se envíen como 'undefined' o 'NaN'
       const healthData = {
-        email: userData.email,
-        age: parseInt(age),
-        height_cm: parseFloat(height),
-        weight_kg: parseFloat(weight),
-        bmi: parseFloat(bmi),
-        sleep_hours: parseFloat(sleepHours),
-        water_glasses: parseInt(waterGlasses),
+        email: userData.email, 
+        age: parseInt(age) || 0,
+        height_cm: parseFloat(height) || 0,
+        weight_kg: parseFloat(weight) || 0,
+        bmi: parseFloat(bmi) || 0,
+        sleep_hours: parseFloat(sleepHours) || 0,
+        water_glasses: parseInt(waterGlasses) || 0,
         activity_level: selectedActivity,
       };
+
+      // --- DEBUG: MIRA ESTO EN TU TERMINAL ---
+      console.log("📤 DATOS QUE SE ESTÁN ENVIANDO:", JSON.stringify(healthData, null, 2));
 
       // 3. Enviar al Backend
       const response = await axios.post(`${API_URL}/health/submit`, healthData);
 
       if (response.data.success) {
-        
-        // 4. Guardar en Local (para el botón del Home)
+        // ... (Guardado exitoso - igual que antes) ...
         const finalResults = { ...healthData, ...response.data.data };
         await AsyncStorage.setItem('last_check_results', JSON.stringify(finalResults));
 
-        // --- AQUÍ ESTÁ EL CAMBIO ---
-        // 5. Mostrar mensaje de éxito y luego navegar
-        setLoading(false); // Quitamos el spinner antes de la alerta
+        setLoading(false);
         
         Alert.alert(
-          "¡Excelente Trabajo!",                 // Título
-          "Tu información ha sido guardada correctamente.", // Mensaje
+          "¡Guardado!",
+          "Tu información se actualizó correctamente.",
           [
             { 
               text: "Ver Resultados", 
               onPress: () => {
-                // Al presionar OK, vamos al Home
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'Main' }],
+                  routes: [{ name: 'Main' }, { 
+                    name: 'HealthResults', 
+                    params: { results: finalResults } 
+                  }],
                 });
               } 
             }
           ],
-          { cancelable: false } // Evita cerrar la alerta tocando afuera
+          { cancelable: false }
         );
-
-      } else {
-        Alert.alert("Atención", "No se pudieron guardar los datos.");
-        setLoading(false);
-      }
+      } 
 
     } catch (error) {
-      console.error("Error:", error);
-      Alert.alert("Error de Conexión", "Revisa tu internet e inténtalo de nuevo.");
+      console.error("❌ Error en la petición:", error);
+      
+      // --- ALERTA INTELIGENTE PARA ERROR 400 ---
+      if (error.response) {
+        // El servidor respondió con un código de error (como 400)
+        console.log("Detalle del error:", error.response.data);
+        
+        // Mensaje personalizado si faltan campos
+        let mensajeError = error.response.data.message || "Error desconocido del servidor.";
+        if (error.response.data.missing) {
+          mensajeError += `\n\nFaltan: ${error.response.data.missing.join(', ')}`;
+        }
+
+        Alert.alert("Error al Guardar", mensajeError);
+      } else if (error.request) {
+        // No hubo respuesta (problema de red)
+        Alert.alert("Error de Conexión", "No se pudo conectar con el servidor. Revisa tu internet o la IP en apiConfig.");
+      } else {
+        Alert.alert("Error", error.message);
+      }
+    } finally {
       setLoading(false);
     }
   };
-
+  
   const ActivityCard = ({ level, isSelected, onPress }) => (
     <TouchableOpacity
       style={[

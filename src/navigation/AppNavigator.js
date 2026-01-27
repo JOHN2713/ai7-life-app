@@ -13,15 +13,14 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
 import MainTabNavigator from './MainTabNavigator';
 import HealthFlowNavigator from './HealthFlowNavigator';
+import HealthResults from '../screens/HealthResults';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Splash"
-        screenOptions={{
+      <Stack.Navigator initialRouteName="Splash" screenOptions={{
           headerShown: false,
         }}
       >
@@ -35,6 +34,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Chat" component={ChatScreen} />
         <Stack.Screen name="FriendsList" component={FriendsListScreen} />
         <Stack.Screen name="ChatDetail" component={ChatScreenList} />
+        <Stack.Screen name="HealthResults" component={HealthResults} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
