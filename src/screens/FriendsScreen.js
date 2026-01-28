@@ -14,6 +14,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { friendsAPI } from '../services/api';
 import { COLORS } from '../constants/colors';
+import * as Notifications from 'expo-notifications';
+import { useUnreadMessages } from '../contexts/UnreadMessagesContext';
 
 const FriendsScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('friends'); // friends, requests, search
@@ -24,15 +26,28 @@ const FriendsScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const { unreadByFriend, loadUnreadCounts } = useUnreadMessages();
 
   useEffect(() => {
     loadInitialData();
+    
+    // Listener para cuando se recibe una notificación
+    const subscription = Notifications.addNotificationReceivedListener(notification => {
+      if (notification.request.content.data?.type === 'friend_message') {
+        loadUnreadCounts();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const loadInitialData = async () => {
     setLoading(true);
     try {
       await Promise.all([loadFriends(), loadRequests()]);
+      loadUnreadCounts(); // Cargar también los conteos
     } catch (error) {
       console.error('Error al cargar datos:', error);
     } finally {
@@ -73,12 +88,22 @@ const FriendsScreen = ({ navigation }) => {
 
     setSearchLoading(true);
     try {
+      console.log('🔍 Buscando usuarios con término:', text);
       const response = await friendsAPI.searchUsers(text);
+      console.log('📦 Respuesta de búsqueda:', response);
+      
       if (response.success) {
+        console.log('✅ Usuarios encontrados:', response.users?.length || 0);
         setSearchResults(response.users || []);
+      } else {
+        console.log('⚠️ Búsqueda sin éxito:', response);
+        setSearchResults([]);
       }
     } catch (error) {
-      console.error('Error en búsqueda:', error);
+      console.error('❌ Error en búsqueda:', error);
+      console.error('Error detalles:', error.response?.data || error.message);
+      setSearchResults([]);
+      Alert.alert('Error', 'No se pudo realizar la búsqueda. Verifica tu conexión.');
     } finally {
       setSearchLoading(false);
     }
@@ -189,25 +214,44 @@ const FriendsScreen = ({ navigation }) => {
     }
   };
 
-  const renderFriendItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.userCard}
-      onPress={() => {
-        // TODO: Navegar al perfil del amigo o chat
-      }}
-      onLongPress={() => handleRemoveFriend(item.id, item.name)}
-    >
-      <Image source={getAvatarSource(item.avatar_url)} style={styles.avatar} />
-      <View style={styles.userInfo}>
-        <Text style={styles.userName}>{item.name}</Text>
-        <Text style={styles.userEmail}>{item.email}</Text>
-        <Text style={styles.friendsSince}>
-          Amigos desde {new Date(item.friends_since).toLocaleDateString()}
-        </Text>
-      </View>
-      <Ionicons name="chevron-forward" size={24} color={COLORS.textSecondary} />
-    </TouchableOpacity>
-  );
+  const renderFriendItem = ({ item }) => {
+    const unreadCount = unreadByFriend[item.id] || 0;
+    
+    return (
+      <TouchableOpacity
+        style={styles.userCard}
+        onPress={() => {
+          // Navegar al chat con el amigo
+          navigation.navigate('FriendChat', { friend: item });
+        }}
+        onLongPress={() => handleRemoveFriend(item.id, item.name)}
+      >
+        <View style={styles.avatarContainer}>
+          <Image source={getAvatarSource(item.avatar_url)} style={styles.avatar} />
+          {unreadCount > 0 && (
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadBadgeText}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.userInfo}>
+          <Text style={styles.userName}>{item.name}</Text>
+          <Text style={styles.userEmail}>{item.email}</Text>
+          <Text style={styles.friendsSince}>
+            Amigos desde {new Date(item.friends_since).toLocaleDateString()}
+          </Text>
+        </View>
+        <View style={styles.chatIconContainer}>
+          <Ionicons name="chatbubble-outline" size={24} color={COLORS.primary} />
+          {unreadCount > 0 && (
+            <View style={styles.unreadDot} />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const renderRequestItem = ({ item }) => (
     <View style={styles.userCard}>
@@ -645,6 +689,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 40,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  unreadBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: COLORS.error,
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.white,
+  },
+  unreadBadgeText: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  chatIconContainer: {
+    position: 'relative',
+  },
+  unreadDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.error,
+    borderWidth: 2,
+    borderColor: COLORS.white,
   },
 });
 

@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import notificationService from './src/services/notificationService';
+import { UnreadMessagesProvider } from './src/contexts/UnreadMessagesContext';
 
 export default function App() {
   useEffect(() => {
@@ -19,9 +20,9 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <UnreadMessagesProvider>
       <AppNavigator />
       <StatusBar style="auto" />
-    </>
+    </UnreadMessagesProvider>
   );
 }
