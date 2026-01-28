@@ -2,11 +2,12 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
+import ChatTabIcon from '../components/ChatTabIcon';
 
 // Importar pantallas
 import HomeScreen from '../screens/HomeScreen';
 import GoalsScreen from '../screens/GoalsScreen';
-import ChatTabPlaceholder from '../screens/ChatTabPlaceholder';
+import ConversationsScreen from '../screens/ConversationsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
@@ -24,7 +25,8 @@ export default function MainTabNavigator() {
           } else if (route.name === 'GoalsTab') {
             iconName = 'calendar';
           } else if (route.name === 'ChatTab') {
-            iconName = 'chatbubbles';
+            // Usar componente personalizado para chat
+            return <ChatTabIcon focused={focused} color={color} size={size} />;
           } else if (route.name === 'ProfileTab') {
             iconName = 'person';
           }
@@ -64,13 +66,7 @@ export default function MainTabNavigator() {
       <Tab.Screen name="GoalsTab" component={GoalsScreen} />
       <Tab.Screen 
         name="ChatTab" 
-        component={ChatTabPlaceholder}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.navigate('Chat');
-          },
-        })}
+        component={ConversationsScreen}
       />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} />
     </Tab.Navigator>

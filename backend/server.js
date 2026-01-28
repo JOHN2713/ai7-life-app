@@ -24,6 +24,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Middleware de logging
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  if (req.query && Object.keys(req.query).length > 0) {
+    console.log('   Query:', req.query);
+  }
+  next();
+});
+
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);

@@ -356,11 +356,19 @@ export const friendsAPI = {
   // Buscar usuarios
   searchUsers: async (searchTerm) => {
     try {
+      console.log('🌐 API: Buscando usuarios con término:', searchTerm);
+      console.log('🔗 API URL:', API_URL);
+      
       const response = await api.get('/friends/search', {
         params: { search: searchTerm }
       });
+      
+      console.log('📥 API: Respuesta recibida:', response.data);
       return response.data;
     } catch (error) {
+      console.error('❌ API Error:', error);
+      console.error('❌ API Error response:', error.response?.data);
+      console.error('❌ API Error status:', error.response?.status);
       throw error.response?.data || { error: 'Error de conexión' };
     }
   },
@@ -419,6 +427,66 @@ export const friendsAPI = {
   removeFriend: async (friendId) => {
     try {
       const response = await api.delete(`/friends/${friendId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // ========================================
+  // MENSAJERÍA ENTRE AMIGOS
+  // ========================================
+
+  // Enviar mensaje a un amigo
+  sendMessage: async (receiverId, message) => {
+    try {
+      console.log('💬 API: Enviando mensaje a amigo:', receiverId);
+      const response = await api.post('/friends/messages', { receiverId, message });
+      return response.data;
+    } catch (error) {
+      console.error('❌ API Error al enviar mensaje:', error.response?.data);
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Obtener conversación con un amigo
+  getConversation: async (friendId, limit = 50, offset = 0) => {
+    try {
+      console.log('💬 API: Obteniendo conversación con:', friendId);
+      const response = await api.get(`/friends/messages/${friendId}`, {
+        params: { limit, offset }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('❌ API Error al obtener conversación:', error.response?.data);
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Obtener lista de conversaciones
+  getConversations: async () => {
+    try {
+      const response = await api.get('/friends/messages/conversations');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Marcar mensajes como leídos
+  markAsRead: async (friendId) => {
+    try {
+      const response = await api.put(`/friends/messages/${friendId}/read`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Error de conexión' };
+    }
+  },
+
+  // Obtener total de mensajes no leídos
+  getUnreadCount: async () => {
+    try {
+      const response = await api.get('/friends/messages/unread-count');
       return response.data;
     } catch (error) {
       throw error.response?.data || { error: 'Error de conexión' };

@@ -15,6 +15,8 @@ import GoalRemindersScreen from '../screens/GoalRemindersScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import FriendsScreen from '../screens/FriendsScreen';
+import FriendChatScreen from '../screens/FriendChatScreen';
+import ConversationsScreen from '../screens/ConversationsScreen';
 import MainTabNavigator from './MainTabNavigator';
 
 const Stack = createNativeStackNavigator();
@@ -35,9 +37,11 @@ export default function AppNavigator() {
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen name="Conversations" component={ConversationsScreen} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Friends" component={FriendsScreen} />
+        <Stack.Screen name="FriendChat" component={FriendChatScreen} />
         <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
         <Stack.Screen name="GoalDetail" component={GoalDetailScreen} />
         <Stack.Screen name="GoalReminders" component={GoalRemindersScreen} />
