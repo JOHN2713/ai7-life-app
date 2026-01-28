@@ -17,7 +17,7 @@ pool.on('connect', () => {
 
 // Evento de error
 pool.on('error', (err) => {
-  console.error('❌ Error en PostgreSQL:', err);
+  console.error('Error en PostgreSQL:', err);
   process.exit(-1);
 });
 
@@ -30,7 +30,7 @@ const testConnection = async () => {
     client.release();
     return true;
   } catch (error) {
-    console.error('❌ Error al conectar a la base de datos:', error.message);
+    console.error('Error al conectar a la base de datos:', error.message);
     return false;
   }
 };
