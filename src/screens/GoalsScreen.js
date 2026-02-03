@@ -43,14 +43,14 @@ export default function GoalsScreen({ navigation }) {
   const loadGoals = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Cargando metas...');
+      console.log('Cargando metas...');
       const response = await goalsAPI.getUserGoals(true); // Solo activas
-      console.log('✅ Metas recibidas:', response);
-      console.log('📊 Cantidad de metas:', response.goals?.length || 0);
+      console.log('Metas recibidas:', response);
+      console.log('Cantidad de metas:', response.goals?.length || 0);
       setGoals(response.goals || []);
     } catch (error) {
-      console.error('❌ Error al cargar metas:', error);
-      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+      console.error('Error al cargar metas:', error);
+      console.error('Error completo:', JSON.stringify(error, null, 2));
       Alert.alert('Error', error.error || 'No se pudieron cargar las metas');
     } finally {
       setLoading(false);

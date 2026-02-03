@@ -108,9 +108,9 @@ export default function GoalRemindersScreen({ route, navigation }) {
           userName
         );
         generatedMessage = messageResponse.message;
-        console.log('✅ Mensaje generado completo:', generatedMessage);
+        console.log('Mensaje generado completo:', generatedMessage);
       } catch (error) {
-        console.warn('⚠️ Error al generar mensaje, se usará predefinido en el backend');
+        console.warn('Error al generar mensaje, se usará predefinido en el backend');
       }
 
       // Crear recordatorio en backend con el mensaje generado
@@ -125,7 +125,7 @@ export default function GoalRemindersScreen({ route, navigation }) {
       if (response.success) {
         const finalMessage = response.reminder.message || generatedMessage || '¡Es hora de cumplir tu meta! 💪';
         
-        console.log('📱 Programando notificación con mensaje:', finalMessage);
+        console.log('Programando notificación con mensaje:', finalMessage);
 
         // Programar notificación local con el mensaje completo
         await notificationService.scheduleDailyNotification(

@@ -10,12 +10,12 @@ const searchUsers = async (req, res) => {
     const userId = req.user.userId;
     const { search } = req.query;
 
-    console.log('🔍 [Friends Controller] Búsqueda de usuarios');
+    console.log(' [Friends Controller] Búsqueda de usuarios');
     console.log('   Usuario que busca:', userId);
     console.log('   Término de búsqueda:', search);
 
     if (!search || search.trim().length < 2) {
-      console.log('   ⚠️  Búsqueda rechazada: menos de 2 caracteres');
+      console.log(' Búsqueda rechazada: menos de 2 caracteres');
       return res.status(400).json({
         success: false,
         error: 'Debes ingresar al menos 2 caracteres para buscar'
@@ -48,7 +48,7 @@ const searchUsers = async (req, res) => {
     );
 
     const users = result.rows || result;
-    console.log('   ✅ Usuarios encontrados:', users.length);
+    console.log(' Usuarios encontrados:', users.length);
     users.forEach(u => console.log(`      - ${u.name} (${u.email}) - ${u.friendship_status}`));
 
     res.json({
@@ -57,7 +57,7 @@ const searchUsers = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ [Friends Controller] Error al buscar usuarios:', error);
+    console.error('[Friends Controller] Error al buscar usuarios:', error);
     res.status(500).json({
       success: false,
       error: 'Error al buscar usuarios'
@@ -121,7 +121,7 @@ const sendFriendRequest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al enviar solicitud:', error);
+    console.error('[Friends Controller] Error al enviar solicitud:', error);
     res.status(500).json({
       success: false,
       error: 'Error al enviar solicitud de amistad'
@@ -164,7 +164,7 @@ const acceptFriendRequest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al aceptar solicitud:', error);
+    console.error('[Friends Controller] Error al aceptar solicitud:', error);
     res.status(500).json({
       success: false,
       error: 'Error al aceptar solicitud'
@@ -190,7 +190,7 @@ const rejectFriendRequest = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al rechazar solicitud:', error);
+    console.error('[Friends Controller] Error al rechazar solicitud:', error);
     res.status(500).json({
       success: false,
       error: 'Error al rechazar solicitud'
@@ -230,7 +230,7 @@ const getFriends = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al obtener amigos:', error);
+    console.error('[Friends Controller] Error al obtener amigos:', error);
     res.status(500).json({
       success: false,
       error: 'Error al obtener lista de amigos'
@@ -265,7 +265,7 @@ const getPendingRequests = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al obtener solicitudes:', error);
+    console.error('[Friends Controller] Error al obtener solicitudes:', error);
     res.status(500).json({
       success: false,
       error: 'Error al obtener solicitudes pendientes'
@@ -293,7 +293,7 @@ const removeFriend = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al eliminar amistad:', error);
+    console.error('[Friends Controller] Error al eliminar amistad:', error);
     res.status(500).json({
       success: false,
       error: 'Error al eliminar amistad'
@@ -311,7 +311,7 @@ const sendMessageToFriend = async (req, res) => {
     const senderId = req.user.userId;
     const { receiverId, message } = req.body;
 
-    console.log('💬 [Friends Controller] Enviando mensaje');
+    console.log('[Friends Controller] Enviando mensaje');
     console.log('   De:', senderId);
     console.log('   Para:', receiverId);
 
@@ -348,7 +348,7 @@ const sendMessageToFriend = async (req, res) => {
     );
     const newMessage = (messageResult.rows || messageResult)[0];
 
-    console.log('   ✅ Mensaje enviado:', newMessage.id);
+    console.log('Mensaje enviado:', newMessage.id);
 
     res.json({
       success: true,
@@ -356,7 +356,7 @@ const sendMessageToFriend = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ [Friends Controller] Error al enviar mensaje:', error);
+    console.error('[Friends Controller] Error al enviar mensaje:', error);
     res.status(500).json({
       success: false,
       error: 'Error al enviar mensaje'
@@ -371,7 +371,7 @@ const getConversation = async (req, res) => {
     const { friendId } = req.params;
     const { limit = 50, offset = 0 } = req.query;
 
-    console.log('💬 [Friends Controller] Obteniendo conversación');
+    console.log('[Friends Controller] Obteniendo conversación');
     console.log('   Usuario:', userId);
     console.log('   Amigo:', friendId);
 
@@ -416,7 +416,7 @@ const getConversation = async (req, res) => {
       [userId, friendId]
     );
 
-    console.log('   ✅ Mensajes obtenidos:', messages.length);
+    console.log('Mensajes obtenidos:', messages.length);
 
     res.json({
       success: true,
@@ -424,7 +424,7 @@ const getConversation = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ [Friends Controller] Error al obtener conversación:', error);
+    console.error('[Friends Controller] Error al obtener conversación:', error);
     res.status(500).json({
       success: false,
       error: 'Error al obtener conversación'
@@ -437,7 +437,7 @@ const getConversations = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    console.log('💬 [Friends Controller] Obteniendo conversaciones');
+    console.log('[Friends Controller] Obteniendo conversaciones');
     console.log('   Usuario:', userId);
 
     const conversationsResult = await query(
@@ -467,7 +467,7 @@ const getConversations = async (req, res) => {
     );
     const conversations = conversationsResult.rows || conversationsResult;
 
-    console.log('   ✅ Conversaciones encontradas:', conversations.length);
+    console.log('Conversaciones encontradas:', conversations.length);
 
     res.json({
       success: true,
@@ -475,7 +475,7 @@ const getConversations = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ [Friends Controller] Error al obtener conversaciones:', error);
+    console.error('[Friends Controller] Error al obtener conversaciones:', error);
     res.status(500).json({
       success: false,
       error: 'Error al obtener conversaciones'
@@ -502,7 +502,7 @@ const markAsRead = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al marcar mensajes como leídos:', error);
+    console.error('[Friends Controller] Error al marcar mensajes como leídos:', error);
     res.status(500).json({
       success: false,
       error: 'Error al marcar mensajes como leídos'
@@ -545,7 +545,7 @@ const getUnreadCount = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al obtener mensajes no leídos:', error);
+    console.error('[Friends Controller] Error al obtener mensajes no leídos:', error);
     res.status(500).json({
       success: false,
       error: 'Error al obtener mensajes no leídos'

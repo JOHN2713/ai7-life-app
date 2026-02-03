@@ -43,7 +43,7 @@ app.use('/api/friends', friendsRoutes);
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ 
-    message: '🚀 AI7 Life API Server',
+    message: 'AI7 Life API Server',
     version: '1.0.0',
     status: 'running'
   });
@@ -69,7 +69,7 @@ app.use((req, res) => {
 
 // Manejo de errores
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.stack);
+  console.error('Error:', err.stack);
   res.status(err.status || 500).json({
     error: err.message || 'Error interno del servidor',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
@@ -82,16 +82,16 @@ const startServer = async () => {
     // Probar conexión a la base de datos
     const dbConnected = await testConnection();
     if (!dbConnected) {
-      console.error('⚠️  Servidor iniciado pero sin conexión a la base de datos');
+      console.error('Servidor iniciado pero sin conexión a la base de datos');
     }
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`\n🚀 Servidor corriendo en:`);
+      console.log(`\nServidor corriendo en:`);
       console.log(`   http://localhost:${PORT}`);
       console.log(`   http://192.168.1.214:${PORT}`);
-      console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🗄️  Database: ${process.env.DB_NAME}`);
-      console.log(`\n📍 Endpoints disponibles:`);
+      console.log(`Environment: ${process.env.NODE_ENV}`);
+      console.log(`Database: ${process.env.DB_NAME}`);
+      console.log(`\nEndpoints disponibles:`);
       console.log(`   GET  /              - Información del API`);
       console.log(`   GET  /health        - Health check`);
       console.log(`   POST /api/auth/register - Registrar usuario`);
@@ -99,10 +99,10 @@ const startServer = async () => {
       console.log(`   GET  /api/goals         - Obtener metas`);
       console.log(`   POST /api/goals         - Crear meta`);
       console.log(`   GET  /api/goals/templates - Plantillas de metas`);
-      console.log(`\n✨ Listo para recibir peticiones!\n`);
+      console.log(`\nListo para recibir peticiones!\n`);
     });
   } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error);
+    console.error('Error al iniciar el servidor:', error);
     process.exit(1);
   }
 };

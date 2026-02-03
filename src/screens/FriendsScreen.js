@@ -88,19 +88,19 @@ const FriendsScreen = ({ navigation }) => {
 
     setSearchLoading(true);
     try {
-      console.log('🔍 Buscando usuarios con término:', text);
+      console.log('Buscando usuarios con término:', text);
       const response = await friendsAPI.searchUsers(text);
-      console.log('📦 Respuesta de búsqueda:', response);
+      console.log('Respuesta de búsqueda:', response);
       
       if (response.success) {
-        console.log('✅ Usuarios encontrados:', response.users?.length || 0);
+        console.log('Usuarios encontrados:', response.users?.length || 0);
         setSearchResults(response.users || []);
       } else {
-        console.log('⚠️ Búsqueda sin éxito:', response);
+        console.log('Búsqueda sin éxito:', response);
         setSearchResults([]);
       }
     } catch (error) {
-      console.error('❌ Error en búsqueda:', error);
+      console.error('Error en búsqueda:', error);
       console.error('Error detalles:', error.response?.data || error.message);
       setSearchResults([]);
       Alert.alert('Error', 'No se pudo realizar la búsqueda. Verifica tu conexión.');

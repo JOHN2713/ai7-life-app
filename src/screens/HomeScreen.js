@@ -42,19 +42,19 @@ export default function HomeScreen({ navigation }) {
 
   const loadGoals = async () => {
     try {
-      console.log('🏠 Cargando metas en HomeScreen...');
+      console.log('Cargando metas en HomeScreen...');
       const response = await goalsAPI.getUserGoals(true); // Solo metas activas
-      console.log('✅ Respuesta de metas:', response);
+      console.log('Respuesta de metas:', response);
       
       if (response.success && response.goals) {
-        console.log('📊 Metas activas encontradas:', response.goals.length);
+        console.log('Metas activas encontradas:', response.goals.length);
         setGoals(response.goals);
       } else {
-        console.log('⚠️ No se encontraron metas');
+        console.log('No se encontraron metas');
         setGoals([]);
       }
     } catch (error) {
-      console.error('❌ Error al cargar metas en HomeScreen:', error);
+      console.error('Error al cargar metas en HomeScreen:', error);
       setGoals([]);
     }
   };

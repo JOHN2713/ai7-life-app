@@ -5,8 +5,8 @@ async function testSearch() {
     const userId = 'd39bb205-81fa-40cd-96f1-a924978ce142'; // Johny
     const searchTerm = 'Juan';
     
-    console.log(`🔍 Buscando usuarios con el término: "${searchTerm}"`);
-    console.log(`👤 Usuario actual: Johny (${userId})\n`);
+    console.log(`Buscando usuarios con el término: "${searchTerm}"`);
+    console.log(`Usuario actual: Johny (${userId})\n`);
     
     const users = await query(
       `SELECT 
@@ -33,11 +33,11 @@ async function testSearch() {
       [userId, `%${searchTerm.toLowerCase()}%`]
     );
     
-    console.log('✅ Resultados de búsqueda:');
+    console.log('Resultados de búsqueda:');
     console.log(JSON.stringify(users.rows, null, 2));
     
     // Probar con otro término
-    console.log('\n\n🔍 Buscando usuarios con el término: "admin"');
+    console.log('\n\nBuscando usuarios con el término: "admin"');
     
     const users2 = await query(
       `SELECT 
@@ -64,11 +64,11 @@ async function testSearch() {
       [userId, `%admin%`]
     );
     
-    console.log('✅ Resultados de búsqueda:');
+    console.log('Resultados de búsqueda:');
     console.log(JSON.stringify(users2.rows, null, 2));
     
     // Probar búsqueda por email
-    console.log('\n\n🔍 Buscando usuarios con el término: "perseo"');
+    console.log('\n\nBuscando usuarios con el término: "perseo"');
     
     const users3 = await query(
       `SELECT 
@@ -95,12 +95,12 @@ async function testSearch() {
       [userId, `%perseo%`]
     );
     
-    console.log('✅ Resultados de búsqueda:');
+    console.log('Resultados de búsqueda:');
     console.log(JSON.stringify(users3.rows, null, 2));
     
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('Error:', error);
     process.exit(1);
   }
 }

@@ -12,7 +12,7 @@ const pool = new Pool({
 
 // Evento de conexión exitosa
 pool.on('connect', () => {
-  console.log('✅ Conectado a PostgreSQL');
+  console.log('Conectado a PostgreSQL');
 });
 
 // Evento de error
@@ -26,7 +26,7 @@ const testConnection = async () => {
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT NOW()');
-    console.log('⏰ Hora del servidor:', result.rows[0].now);
+    console.log('Hora del servidor:', result.rows[0].now);
     client.release();
     return true;
   } catch (error) {

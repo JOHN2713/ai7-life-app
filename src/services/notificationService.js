@@ -126,11 +126,11 @@ class NotificationService {
     try {
       const [hours, minutes] = hour.split(':').map(Number);
 
-      console.log('📱 Programando notificación diaria:');
-      console.log(`   ⏰ Hora: ${hour}`);
-      console.log(`   📝 Título: ${title}`);
-      console.log(`   💬 Cuerpo (${body.length} caracteres): ${body}`);
-      console.log(`   📦 Data:`, data);
+      console.log('Programando notificación diaria:');
+      console.log(`   Hora: ${hour}`);
+      console.log(`   Título: ${title}`);
+      console.log(`   Cuerpo (${body.length} caracteres): ${body}`);
+      console.log(`   Data:`, data);
 
       const id = await Notifications.scheduleNotificationAsync({
         content: {
@@ -148,7 +148,7 @@ class NotificationService {
         },
       });
 
-      console.log(`✅ Notificación diaria programada para ${hour} - ID:`, id);
+      console.log(`Notificación diaria programada para ${hour} - ID:`, id);
       return id;
     } catch (error) {
       console.error('Error al programar notificación diaria:', error);
@@ -185,7 +185,7 @@ class NotificationService {
         },
       });
 
-      console.log(`✅ Notificación semanal programada:`, id);
+      console.log(`Notificación semanal programada:`, id);
       return id;
     } catch (error) {
       console.error('Error al programar notificación semanal:', error);
@@ -199,7 +199,7 @@ class NotificationService {
   async cancelNotification(notificationId) {
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
-      console.log('🗑️ Notificación cancelada:', notificationId);
+      console.log('Notificación cancelada:', notificationId);
     } catch (error) {
       console.error('Error al cancelar notificación:', error);
     }
@@ -211,7 +211,7 @@ class NotificationService {
   async cancelAllNotifications() {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
-      console.log('🗑️ Todas las notificaciones canceladas');
+      console.log('Todas las notificaciones canceladas');
     } catch (error) {
       console.error('Error al cancelar notificaciones:', error);
     }
@@ -242,7 +242,7 @@ class NotificationService {
       const notificationIds = [];
 
       for (const time of reminderTimes) {
-        const title = `⏰ Recordatorio: ${goal.name}`;
+        const title = `Recordatorio: ${goal.name}`;
         const body = motivationalMessage || `Es hora de completar tu meta del día 💪`;
 
         let notificationId;
@@ -274,7 +274,7 @@ class NotificationService {
         }
       }
 
-      console.log(`✅ ${notificationIds.length} recordatorios programados para "${goal.name}"`);
+      console.log(`${notificationIds.length} recordatorios programados para "${goal.name}"`);
       return notificationIds;
     } catch (error) {
       console.error('Error al programar recordatorios de meta:', error);
@@ -287,18 +287,18 @@ class NotificationService {
    */
   async initialize() {
     try {
-      console.log('🔔 Inicializando servicio de notificaciones...');
+      console.log('Inicializando servicio de notificaciones...');
       
       const hasPermissions = await this.requestPermissions();
       if (!hasPermissions) {
-        console.warn('⚠️ No se otorgaron permisos de notificaciones');
+        console.warn('No se otorgaron permisos de notificaciones');
         return false;
       }
 
       await this.setupNotificationChannel();
       await this.getExpoPushToken();
 
-      console.log('✅ Servicio de notificaciones inicializado');
+      console.log('Servicio de notificaciones inicializado');
       return true;
     } catch (error) {
       console.error('Error al inicializar notificaciones:', error);

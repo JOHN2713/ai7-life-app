@@ -10,9 +10,9 @@ export default function App() {
     const initNotifications = async () => {
       try {
         await notificationService.initialize();
-        console.log('✅ Sistema de notificaciones inicializado');
+        console.log('Sistema de notificaciones inicializado');
       } catch (error) {
-        console.error('⚠️ Error al inicializar notificaciones:', error);
+        console.error('Error al inicializar notificaciones:', error);
       }
     };
 

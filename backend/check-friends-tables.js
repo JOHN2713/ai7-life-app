@@ -10,12 +10,12 @@ async function checkFriendsTables() {
         AND table_name IN ('friendships', 'friend_messages', 'shared_goals')
     `);
     
-    console.log('✅ Tablas de amigos encontradas:');
+    console.log('Tablas de amigos encontradas:');
     console.log(tables.rows);
     
     // Si no hay tablas, mostrar instrucciones
     if (tables.rows.length === 0) {
-      console.log('\n⚠️  NO SE ENCONTRARON TABLAS DE AMIGOS');
+      console.log('\n NO SE ENCONTRARON TABLAS DE AMIGOS');
       console.log('Debes ejecutar el archivo: backend/database/friends_schema.sql');
       console.log('\nInstrucciones:');
       console.log('1. Abre pgAdmin');
@@ -23,12 +23,12 @@ async function checkFriendsTables() {
       console.log('3. Abre Query Tool');
       console.log('4. Ejecuta el archivo friends_schema.sql');
     } else {
-      console.log(`\n✅ Se encontraron ${tables.rows.length} tablas`);
+      console.log(`\nSe encontraron ${tables.rows.length} tablas`);
     }
     
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('Error:', error.message);
     process.exit(1);
   }
 }

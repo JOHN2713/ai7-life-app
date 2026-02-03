@@ -181,7 +181,7 @@ Ejemplos del estilo deseado:
         console.log(`🤖 Mensaje ${messageType} generado con IA:`, message);
 
       } catch (aiError) {
-        console.warn('⚠️ Error al usar IA, usando mensaje predefinido:', aiError.message);
+        console.warn('Error al usar IA, usando mensaje predefinido:', aiError.message);
         // Continuar con fallback
       }
     }
@@ -196,7 +196,7 @@ Ejemplos del estilo deseado:
         message = message.replace('¡', `¡${userName}, `);
       }
 
-      console.log(`📝 Mensaje ${messageType} predefinido:`, message);
+      console.log(`Mensaje ${messageType} predefinido:`, message);
     }
 
     res.json({

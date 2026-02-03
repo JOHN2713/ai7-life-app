@@ -14,7 +14,7 @@ async function migrate() {
   const client = await pool.connect();
   
   try {
-    console.log('🔄 Iniciando migración...');
+    console.log('Iniciando migración...');
     
     // Verificar si las columnas ya existen
     const checkQuery = `
@@ -28,33 +28,33 @@ async function migrate() {
     const columnNames = existingColumns.rows.map(row => row.column_name);
     
     if (columnNames.includes('message') && columnNames.includes('message_type')) {
-      console.log('✅ Las columnas ya existen, no se requiere migración');
+      console.log('Las columnas ya existen, no se requiere migración');
       return;
     }
     
     // Agregar columnas
     if (!columnNames.includes('message')) {
-      console.log('📝 Agregando columna message...');
+      console.log('Agregando columna message...');
       await client.query(`
         ALTER TABLE goal_reminders 
         ADD COLUMN message TEXT;
       `);
-      console.log('✅ Columna message agregada');
+      console.log('Columna message agregada');
     }
     
     if (!columnNames.includes('message_type')) {
-      console.log('📝 Agregando columna message_type...');
+      console.log('Agregando columna message_type...');
       await client.query(`
         ALTER TABLE goal_reminders 
         ADD COLUMN message_type VARCHAR(50) DEFAULT 'motivacion';
       `);
-      console.log('✅ Columna message_type agregada');
+      console.log('Columna message_type agregada');
     }
     
-    console.log('🎉 Migración completada exitosamente');
+    console.log('Migración completada exitosamente');
     
   } catch (error) {
-    console.error('❌ Error en la migración:', error);
+    console.error('Error en la migración:', error);
     throw error;
   } finally {
     client.release();
@@ -65,10 +65,10 @@ async function migrate() {
 // Ejecutar migración
 migrate()
   .then(() => {
-    console.log('✅ Script finalizado');
+    console.log('Script finalizado');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Error fatal:', error);
+    console.error('Error fatal:', error);
     process.exit(1);
   });
