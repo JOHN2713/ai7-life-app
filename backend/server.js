@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware de logging
 app.use((req, res, next) => {
-  console.log(`📥 ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
   if (req.query && Object.keys(req.query).length > 0) {
     console.log('   Query:', req.query);
   }
