@@ -1,26 +1,26 @@
-# 🌟 AI7 Life App
+# AI7 Life App
 
 Aplicación móvil de gestión de vida personal con autenticación completa, construida con React Native (Expo) y backend Node.js + PostgreSQL.
 
-## ✨ Características
+## Características
 
-- 🔐 **Sistema de Autenticación Completo**
+- **Sistema de Autenticación Completo**
   - Registro de usuarios con validación
   - Login con JWT
   - Encriptación de contraseñas (bcrypt)
   - Tokens con expiración
   
-- 👤 **Gestión de Usuarios**
+- **Gestión de Usuarios**
   - Perfiles con avatar automático
   - Fecha de nacimiento
   - Datos persistentes en PostgreSQL
 
-- 🎨 **Interfaz Moderna**
+- **Interfaz Moderna**
   - Diseño limpio y profesional
   - Navegación fluida
   - Feedback visual en tiempo real
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ### 1. Instalar dependencias
 ```bash
@@ -50,7 +50,7 @@ npm start
 
 📚 **Ver [INICIO_RAPIDO.md](INICIO_RAPIDO.md) para guía detallada**
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 ai7-life-app/
@@ -74,7 +74,7 @@ ai7-life-app/
 └── App.js                  # Punto de entrada
 ```
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 ### Frontend
 - **React Native** 0.81.5
@@ -90,7 +90,7 @@ ai7-life-app/
 - **JWT** - Autenticación
 - **dotenv** - Variables de entorno
 
-## 🗄️ Base de Datos
+## Base de Datos
 
 **PostgreSQL** con la siguiente configuración:
 - Database: `useri7_db`
@@ -98,7 +98,7 @@ ai7-life-app/
 - Password: `admin`
 - Puerto: `5432`
 
-## 📱 Ejecutar en diferentes dispositivos
+## Ejecutar en diferentes dispositivos
 
 ### Web
 ```bash
@@ -111,7 +111,7 @@ npm start
 npm start
 # Presiona 'a'
 ```
-⚠️ Cambiar URL en `src/services/api.js` a `http://10.0.2.2:3000/api`
+Cambiar URL en `src/services/api.js` a `http://10.0.2.2:3000/api`
 
 ### iOS Simulator (Mac)
 ```bash
@@ -124,9 +124,9 @@ npm start
 2. Cambiar URL en `src/services/api.js` a `http://TU_IP:3000/api`
 3. Escanear QR con Expo Go
 
-📚 **Ver [CONFIGURACION_RED.md](CONFIGURACION_RED.md) para más detalles**
+**Ver [CONFIGURACION_RED.md](CONFIGURACION_RED.md) para más detalles**
 
-## 🧪 Testing
+## Testing
 
 ### Probar el API
 ```powershell
@@ -139,7 +139,7 @@ cd backend
 curl http://localhost:3000/health
 ```
 
-## 📖 Documentación
+## Documentación
 
 - **[INICIO_RAPIDO.md](INICIO_RAPIDO.md)** - Guía de inicio rápido
 - **[INSTRUCCIONES_SETUP.md](INSTRUCCIONES_SETUP.md)** - Setup completo paso a paso
@@ -148,7 +148,7 @@ curl http://localhost:3000/health
 - **[backend/README.md](backend/README.md)** - Documentación del API
 - **[backend/api-docs.yaml](backend/api-docs.yaml)** - Especificación OpenAPI
 
-## 🔐 API Endpoints
+## API Endpoints
 
 ### Autenticación
 
@@ -182,7 +182,7 @@ GET /api/auth/verify
 Authorization: Bearer {token}
 ```
 
-## 🤝 Contribuir
+## Contribuir
 
 1. Fork el proyecto
 2. Crea tu rama de feature (`git checkout -b feature/AmazingFeature`)
@@ -190,17 +190,17 @@ Authorization: Bearer {token}
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto es privado.
 
-## 👥 Equipo
+## Equipo
 
 AI7 Life Team - 2026
 
 ---
 
-## 🆘 Soporte
+## Soporte
 
 Si tienes problemas:
 
