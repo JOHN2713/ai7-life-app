@@ -1,9 +1,5 @@
 const { query } = require('../config/database');
 
-// ========================================
-// BÚSQUEDA DE USUARIOS
-// ========================================
-
 // Buscar usuarios por nombre o email
 const searchUsers = async (req, res) => {
   try {
@@ -64,10 +60,6 @@ const searchUsers = async (req, res) => {
     });
   }
 };
-
-// ========================================
-// SOLICITUDES DE AMISTAD
-// ========================================
 
 // Enviar solicitud de amistad
 const sendFriendRequest = async (req, res) => {
@@ -197,10 +189,6 @@ const rejectFriendRequest = async (req, res) => {
     });
   }
 };
-
-// ========================================
-// LISTA DE AMIGOS
-// ========================================
 
 // Obtener lista de amigos
 const getFriends = async (req, res) => {

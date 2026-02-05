@@ -1,12 +1,6 @@
 const { query } = require('../config/database');
 
-/**
- * Controller para el sistema de metas (Goals)
- */
 
-// ========================================
-// OBTENER TODAS LAS METAS DEL USUARIO
-// ========================================
 const getUserGoals = async (req, res) => {
   try {
     const { userId } = req.user; // Del middleware de autenticación
