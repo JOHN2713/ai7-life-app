@@ -203,15 +203,13 @@ export default function GoalDetailScreen({ route, navigation }) {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{history.length}</Text>
+              <Text style={styles.statValue}>{goal.total_completed_days || 0}</Text>
               <Text style={styles.statLabel}>Completados</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {goal.duration_days > 0 
-                  ? Math.round((history.length / goal.duration_days) * 100) 
-                  : 0}%
+                {goal.progress || 0}%
               </Text>
               <Text style={styles.statLabel}>Progreso</Text>
             </View>
