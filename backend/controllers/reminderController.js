@@ -4,13 +4,6 @@ const { query } = require('../config/database');
 // Inicializar Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-/**
- * Controller para Recordatorios con IA
- */
-
-// ========================================
-// MENSAJES PREDEFINIDOS (FALLBACK)
-// ========================================
 const PREDEFINED_MESSAGES = {
   motivacion: [
     '¡Es tu momento de brillar! {goal} te acerca a tu mejor versión cada día 💪✨',
