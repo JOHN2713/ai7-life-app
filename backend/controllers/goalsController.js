@@ -106,7 +106,15 @@ const getGoalById = async (req, res) => {
           SELECT COUNT(*)
           FROM goal_completions gc
           WHERE gc.goal_id = g.id
-        ) as completions_count
+        ) as completions_count,
+        (
+          SELECT COUNT(*)
+          FROM goal_completions gc
+          WHERE gc.goal_id = g.id
+          AND gc.completion_date >= g.start_date
+          AND gc.completion_date <= g.end_date
+        ) as total_completed_days,
+        g.duration_days as total_days
       FROM goals g
       LEFT JOIN goal_days gd ON g.id = gd.goal_id
       LEFT JOIN goal_reminders gr ON g.id = gr.goal_id
@@ -123,9 +131,15 @@ const getGoalById = async (req, res) => {
       });
     }
 
+    // Calcular progreso
+    const goal = result.rows[0];
+    goal.progress = goal.total_days > 0 
+      ? Math.round((goal.total_completed_days / goal.total_days) * 100) 
+      : 0;
+
     res.json({
       success: true,
-      goal: result.rows[0]
+      goal: goal
     });
 
   } catch (error) {
