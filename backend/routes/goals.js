@@ -15,9 +15,6 @@ const {
   getGoalStats
 } = require('../controllers/goalsController');
 
-// ========================================
-// VALIDACIONES
-// ========================================
 
 const validateCreateGoal = [
   body('name')
@@ -119,22 +116,15 @@ const validateCompleteGoal = [
     .withMessage('Las notas no pueden exceder 500 caracteres')
 ];
 
-// ========================================
-// RUTAS PÚBLICAS (sin autenticación)
-// ========================================
+// RUTAS  
 
 // Obtener plantillas de metas predefinidas
 router.get('/templates', getGoalTemplates);
-
-// ========================================
-// RUTAS PROTEGIDAS (requieren autenticación)
-// ========================================
 
 // Aplicar middleware de autenticación a todas las rutas siguientes
 router.use(authenticateToken);
 
 // Obtener todas las metas del usuario
-// Query params: ?active_only=true
 router.get('/', getUserGoals);
 
 // Obtener estadísticas de metas del usuario

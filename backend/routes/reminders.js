@@ -13,9 +13,7 @@ const {
   markNotificationAsRead,
 } = require('../controllers/reminderController');
 
-// ========================================
-// VALIDACIONES
-// ========================================
+
 
 const validateReminderTime = () => {
   return body('reminderTime')
@@ -23,28 +21,18 @@ const validateReminderTime = () => {
     .withMessage('El formato de hora debe ser HH:MM (ej: 14:30)');
 };
 
-// ========================================
-// RUTAS PÚBLICAS
-// ========================================
-
 // Generar mensaje motivacional con IA (puede ser público para testing)
 router.post('/generate-message', [
   body('goalName').notEmpty().withMessage('El nombre de la meta es requerido'),
   body('messageType').optional().isIn(['motivacion', 'alerta', 'recordatorio', 'felicitacion', 'animo'])
 ], generateMotivationalMessage);
 
-// ========================================
-// RUTAS PROTEGIDAS (requieren autenticación)
-// ========================================
 
 router.use(authenticateToken);
 
 // Obtener todos los recordatorios del usuario
 router.get('/user', getAllUserReminders);
 
-// ========================================
-// RUTAS DE NOTIFICACIONES (ANTES de las rutas con parámetros)
-// ========================================
 
 // Obtener historial de notificaciones
 router.get('/notifications/history', getNotificationHistory);
@@ -52,9 +40,6 @@ router.get('/notifications/history', getNotificationHistory);
 // Marcar notificación como leída
 router.put('/notifications/:notificationId/read', markNotificationAsRead);
 
-// ========================================
-// RUTAS DE RECORDATORIOS
-// ========================================
 
 // Crear recordatorio para una meta
 router.post('/', [
