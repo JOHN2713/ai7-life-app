@@ -3,7 +3,7 @@ const { query } = require('../config/database');
 
 const getUserGoals = async (req, res) => {
   try {
-    const { userId } = req.user; // Del middleware de autenticación
+    const { userId } = req.user; 
     const { active_only } = req.query;
 
     let sqlQuery = `
@@ -69,9 +69,7 @@ const getUserGoals = async (req, res) => {
   }
 };
 
-// ========================================
-// OBTENER UNA META POR ID
-// ========================================
+
 const getGoalById = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -145,9 +143,7 @@ const getGoalById = async (req, res) => {
   }
 };
 
-// ========================================
-// CREAR UNA NUEVA META
-// ========================================
+
 const createGoal = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -245,9 +241,7 @@ const createGoal = async (req, res) => {
   }
 };
 
-// ========================================
-// ACTUALIZAR UNA META
-// ========================================
+
 const updateGoal = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -331,9 +325,7 @@ const updateGoal = async (req, res) => {
   }
 };
 
-// ========================================
-// ELIMINAR UNA META
-// ========================================
+
 const deleteGoal = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -363,9 +355,7 @@ const deleteGoal = async (req, res) => {
   }
 };
 
-// ========================================
-// MARCAR META COMO COMPLETADA (del día)
-// ========================================
+
 const completeGoal = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -413,9 +403,7 @@ const completeGoal = async (req, res) => {
   }
 };
 
-// ========================================
-// DESMARCAR META COMO COMPLETADA
-// ========================================
+
 const uncompleteGoal = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -459,9 +447,7 @@ const uncompleteGoal = async (req, res) => {
   }
 };
 
-// ========================================
-// OBTENER HISTORIAL DE CUMPLIMIENTO
-// ========================================
+
 const getGoalHistory = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -503,9 +489,7 @@ const getGoalHistory = async (req, res) => {
   }
 };
 
-// ========================================
-// OBTENER PLANTILLAS DE METAS PREDEFINIDAS
-// ========================================
+
 const getGoalTemplates = async (req, res) => {
   try {
     const templatesQuery = `
@@ -539,9 +523,7 @@ const getGoalTemplates = async (req, res) => {
   }
 };
 
-// ========================================
-// ESTADÍSTICAS DE METAS
-// ========================================
+
 const getGoalStats = async (req, res) => {
   try {
     const { userId } = req.user;

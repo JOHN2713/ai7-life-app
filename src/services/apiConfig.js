@@ -1,6 +1,6 @@
 
 
-// Dispositivo Físico 
+// Dispositivo Físico url de tu dispositivo 192.168.0.115
 export const API_URL = 'http://192.168.0.115:3000/api';
 
 // Android Emulator 
