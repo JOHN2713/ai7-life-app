@@ -57,9 +57,7 @@ const PREDEFINED_MESSAGES = {
   ]
 };
 
-// ========================================
-// GENERAR MENSAJE MOTIVACIONAL CON IA
-// ========================================
+
 const generateMotivationalMessage = async (req, res) => {
   try {
     const { goalName, messageType = 'motivacion', userName } = req.body;
@@ -217,9 +215,7 @@ Ejemplos del estilo deseado:
   }
 };
 
-// ========================================
-// CREAR RECORDATORIO PARA UNA META
-// ========================================
+
 const createGoalReminder = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -278,9 +274,7 @@ const createGoalReminder = async (req, res) => {
   }
 };
 
-// ========================================
-// OBTENER RECORDATORIOS DE UNA META
-// ========================================
+
 const getGoalReminders = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -321,9 +315,7 @@ const getGoalReminders = async (req, res) => {
   }
 };
 
-// ========================================
-// ACTUALIZAR RECORDATORIO
-// ========================================
+
 const updateGoalReminder = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -390,9 +382,7 @@ const updateGoalReminder = async (req, res) => {
   }
 };
 
-// ========================================
-// ELIMINAR RECORDATORIO
-// ========================================
+
 const deleteGoalReminder = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -429,9 +419,7 @@ const deleteGoalReminder = async (req, res) => {
   }
 };
 
-// ========================================
-// OBTENER TODOS LOS RECORDATORIOS DEL USUARIO
-// ========================================
+
 const getAllUserReminders = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -464,11 +452,7 @@ const getAllUserReminders = async (req, res) => {
   }
 };
 
-// ========================================
-// HISTORIAL DE NOTIFICACIONES
-// ========================================
 
-// Obtener historial de notificaciones del usuario
 const getNotificationHistory = async (req, res) => {
   try {
     const userId = req.user.userId;

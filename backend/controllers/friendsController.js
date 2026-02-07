@@ -289,10 +289,6 @@ const removeFriend = async (req, res) => {
   }
 };
 
-// ========================================
-// MENSAJERÍA ENTRE AMIGOS
-// ========================================
-
 // Enviar mensaje a un amigo
 const sendMessageToFriend = async (req, res) => {
   try {
@@ -420,7 +416,7 @@ const getConversation = async (req, res) => {
   }
 };
 
-// Obtener lista de conversaciones (con último mensaje)
+// Obtener lista de conversaciones 
 const getConversations = async (req, res) => {
   try {
     const userId = req.user.userId;

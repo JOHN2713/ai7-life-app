@@ -3,7 +3,7 @@
 
 // ===== OPCIÓN 1: Dispositivo Físico (Teléfono/Tablet con Expo Go) =====
 // Asegúrate de que tu PC y dispositivo estén en el MISMO WiFi
-export const API_URL = 'http://192.168.1.214:3000/api';
+export const API_URL = 'http://192.168.0.115:3000/api';
 
 // ===== OPCIÓN 2: Android Emulator =====
 // export const API_URL = 'http://10.0.2.2:3000/api';
