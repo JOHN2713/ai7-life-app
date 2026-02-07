@@ -11,18 +11,13 @@ Notifications.setNotificationHandler({
   }),
 });
 
-/**
- * Servicio de Notificaciones
- * Maneja permisos, registro y programación de notificaciones
- */
+
 class NotificationService {
   constructor() {
     this.expoPushToken = null;
   }
 
-  /**
-   * Solicitar permisos de notificaciones
-   */
+
   async requestPermissions() {
     try {
       if (!Device.isDevice) {
@@ -50,9 +45,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Obtener token de notificaciones push (para Expo Push Notifications)
-   */
+
   async getExpoPushToken() {
     try {
       if (!Device.isDevice) {
@@ -72,9 +65,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Configurar canal de notificación (Android)
-   */
+
   async setupNotificationChannel() {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('goal-reminders', {
@@ -87,9 +78,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Programar una notificación local inmediata
-   */
+
   async scheduleImmediateNotification(title, body, data = {}) {
     try {
       const id = await Notifications.scheduleNotificationAsync({
@@ -193,9 +182,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Cancelar una notificación específica
-   */
+
   async cancelNotification(notificationId) {
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
@@ -205,9 +192,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Cancelar todas las notificaciones programadas
-   */
+
   async cancelAllNotifications() {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
@@ -217,9 +202,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Obtener todas las notificaciones programadas
-   */
+
   async getScheduledNotifications() {
     try {
       const notifications = await Notifications.getAllScheduledNotificationsAsync();
@@ -282,9 +265,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Inicializar el servicio de notificaciones
-   */
+
   async initialize() {
     try {
       console.log('Inicializando servicio de notificaciones...');

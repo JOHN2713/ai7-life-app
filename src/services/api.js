@@ -349,9 +349,7 @@ export const remindersAPI = {
   },
 };
 
-// ========================================
-// API DE AMIGOS
-// ========================================
+
 export const friendsAPI = {
   // Buscar usuarios
   searchUsers: async (searchTerm) => {
@@ -433,9 +431,6 @@ export const friendsAPI = {
     }
   },
 
-  // ========================================
-  // MENSAJERÍA ENTRE AMIGOS
-  // ========================================
 
   // Enviar mensaje a un amigo
   sendMessage: async (receiverId, message) => {

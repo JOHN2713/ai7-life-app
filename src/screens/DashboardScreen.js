@@ -112,9 +112,7 @@ export default function DashboardScreen({ navigation }) {
   // Preparar datos para gráfica de progreso semanal (día vs hora de completado)
   const getWeeklyProgressData = () => {
     const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    
-    // Simulación de horas de completado por día (en producción vendría de DB)
-    // Formato: hora del día en que se completó la meta (0-24)
+
     const datasets = [];
     
     if (selectedGoalId === 'all') {

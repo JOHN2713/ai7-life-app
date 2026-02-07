@@ -50,7 +50,7 @@ INSERT INTO goals (
     'daily'
 ) ON CONFLICT DO NOTHING;
 
--- Meta 2: Cepillarse los dientes
+-- Meta 2: Cepillarse los dientes dsd
 INSERT INTO goals (
     user_id,
     name,
