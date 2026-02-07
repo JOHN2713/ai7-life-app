@@ -218,3 +218,9 @@ Si tienes problemas:
 - La app está lista para recibir las pantallas personalizadas
 - La navegación está preparada pero comentada hasta agregar más screens
 - Todos los componentes usan JavaScript (puedes migrar a TypeScript si lo prefieres)
+
+
+## !NOTA!
+
+- Al momento de seleccionar un prototipo funcional se hizo la realizacion de diferentes ramas las cuales sirvieron como prototipos funcionales en las cuales cada miembro del G7 trabajo para obtener el mejor resultado, el encargado de hacer el QA fue jhony que verifico la funcionalidad del codigo y lo integro al main para produccion.
+
